@@ -3,8 +3,10 @@ import type { NextPage } from 'next';
 import Head from 'next/head';
 import { css } from '@emotion/react';
 import TopTabBar from '@/components/common/topTabBar';
-import MainInputField from '@/components/common/searchFields/mainInputField';
 import { AppContext } from 'state/context';
+import { APIType } from 'state/contextReducer';
+import GiphyHome from '@/components/contents/giphy';
+import WiKiHome from '@/components/contents/wikipedia';
 
 const Home: NextPage = () => {
   const { apiType } = useContext(AppContext);
@@ -20,9 +22,8 @@ const Home: NextPage = () => {
         <TopTabBar />
       </header>
       <main css={Main}>
-        <div>main</div>
-        <div>{apiType.currentTab}</div>
-        <MainInputField />
+        {apiType.currentTab === APIType.giphy && <GiphyHome />}
+        {apiType.currentTab === APIType.wikipedia && <WiKiHome />}
       </main>
     </div>
   );
@@ -31,14 +32,11 @@ const Home: NextPage = () => {
 const Header = css({
   position: 'sticky',
   top: 0,
+  zIndex: 100,
 });
 
 const Main = css({
-  height: '100vh',
-  padding: '4rem 0',
-  flex: 1,
-  display: 'flex',
-  flexDirection: 'column',
+  margin: '2rem 0',
   justifyContent: 'center',
   alignItems: 'center',
 });

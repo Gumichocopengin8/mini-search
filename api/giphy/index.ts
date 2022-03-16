@@ -5,7 +5,7 @@ export const fetchGifSearchResultUsingGET = async (
   query: string,
   rating: string,
   lang: string,
-  limit = 10,
+  limit: number,
   pageNumber = 1
 ): Promise<GiphySearchResult> => {
   return giphyAxios

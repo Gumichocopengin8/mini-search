@@ -6,11 +6,16 @@ type FormData = {
   inputValue: string;
 };
 
-const MainInputField = () => {
+interface Props {
+  placeholder: string;
+  onSubmitFunc: (query: string) => void;
+}
+
+const MainInputField = ({ placeholder, onSubmitFunc }: Props) => {
   const { register, handleSubmit } = useForm<FormData>();
 
   const onSubmit = ({ inputValue }: FormData) => {
-    console.log(inputValue);
+    onSubmitFunc(inputValue.trim());
   };
 
   return (
@@ -19,7 +24,7 @@ const MainInputField = () => {
         <OutlinedInput
           {...register('inputValue', { required: true })}
           type="search"
-          placeholder="Search"
+          placeholder={`Search on ${placeholder}`}
           defaultValue=""
           autoComplete="off"
           autoFocus

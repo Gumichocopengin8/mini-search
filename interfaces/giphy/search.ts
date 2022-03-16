@@ -1,4 +1,4 @@
-export interface Data {
+export interface GiphyData {
   type: string;
   id: string;
   slug: string;
@@ -8,7 +8,7 @@ export interface Data {
   source: string;
   rating: string;
   title: string;
-  images: Image[];
+  images: Image;
 }
 
 export interface Image {
@@ -32,7 +32,7 @@ export interface Image {
   };
 }
 
-export interface Pagination {
+export interface PaginationInfo {
   offset: number;
   total_count: number;
   count: number;
@@ -45,7 +45,7 @@ export interface Meta {
 }
 
 export interface GiphySearchResult {
-  data: Data;
-  pagination: Pagination;
+  data: GiphyData[];
+  pagination: PaginationInfo;
   meta: Meta;
 }

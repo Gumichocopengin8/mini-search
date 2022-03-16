@@ -1,5 +1,5 @@
 import { createContext, ReactNode, useReducer, useMemo, Dispatch } from 'react';
-import { TabViewProps, initialState, reducer, APIType } from './contextReducer';
+import { TabViewProps, initialState, reducer } from './contextReducer';
 
 type Props = {
   children: ReactNode;
