@@ -1,10 +1,14 @@
+import { useContext } from 'react';
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import { css } from '@emotion/react';
 import TopTabBar from '@/components/common/topTabBar';
 import MainInputField from '@/components/common/searchFields/mainInputField';
+import { AppContext } from 'state/context';
 
 const Home: NextPage = () => {
+  const { apiType } = useContext(AppContext);
+
   return (
     <div>
       <Head>
@@ -17,6 +21,7 @@ const Home: NextPage = () => {
       </header>
       <main css={Main}>
         <div>main</div>
+        <div>{apiType.currentTab}</div>
         <MainInputField />
       </main>
     </div>
