@@ -6,7 +6,7 @@ import { fetchGifSearchResultUsingGET } from 'api/giphy';
 import { GiphyData, PaginationInfo } from 'interfaces/giphy/search';
 
 const GiphyHome = () => {
-  const ITEM_LIMIT = 20;
+  const ITEM_LIMIT = 40;
   const [query, setQuery] = useState<string>('');
   const [rating, setRating] = useState<string>('g');
   const [giphyData, setGiphyData] = useState<GiphyData[]>([]);
@@ -57,10 +57,16 @@ const GiphyHome = () => {
           </Typography>
           <div css={Container}>
             <div css={Gallery}>
-              {giphyData.map((data) => (
-                <a key={data.id} href={data.images.original.webp}>
-                  <img src={data.images.original.webp} css={ImageContent} />
-                </a>
+              {[0, 1, 2, 3].map((index) => (
+                <div key={index} css={GalleryColumn}>
+                  {giphyData
+                    .filter((_, i) => i % 4 === index)
+                    .map((data) => (
+                      <a key={data.id} href={data.images.original.webp}>
+                        <img src={data.images.original.webp} loading="lazy" css={ImageContent} />
+                      </a>
+                    ))}
+                </div>
               ))}
             </div>
             <Stack spacing={2} css={PagenationItem}>
@@ -94,11 +100,19 @@ const Gallery = css({
   display: 'flex',
   flexWrap: 'wrap',
   justifyContent: 'inherit',
-  gap: '1rem',
+  gap: '0.5rem',
+});
+
+const GalleryColumn = css({
+  width: '20%',
+  display: 'flex',
+  flexWrap: 'wrap',
+  flexDirection: 'column',
+  gap: '0.5rem',
 });
 
 const ImageContent = css({
-  height: '16vw',
+  width: '100%',
   objectFit: 'contain',
 });
 

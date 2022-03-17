@@ -7,6 +7,7 @@ import { AppContext } from 'state/context';
 import { APIType } from 'state/contextReducer';
 import GiphyHome from '@/components/contents/giphy';
 import WiKiHome from '@/components/contents/wikipedia';
+import SpotifyHome from '@/components/contents/spotify';
 
 const Home: NextPage = () => {
   const { apiType } = useContext(AppContext);
@@ -22,8 +23,15 @@ const Home: NextPage = () => {
         <TopTabBar />
       </header>
       <main css={Main}>
-        {apiType.currentTab === APIType.giphy && <GiphyHome />}
-        {apiType.currentTab === APIType.wikipedia && <WiKiHome />}
+        <div style={{ display: apiType.currentTab === APIType.giphy ? 'block' : 'none' }}>
+          <GiphyHome />
+        </div>
+        <div style={{ display: apiType.currentTab === APIType.wikipedia ? 'block' : 'none' }}>
+          <WiKiHome />
+        </div>
+        <div style={{ display: apiType.currentTab === APIType.spotity ? 'block' : 'none' }}>
+          <SpotifyHome />
+        </div>
       </main>
     </div>
   );
