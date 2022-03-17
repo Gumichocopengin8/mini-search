@@ -44,16 +44,18 @@ const GridContainer = css({
   gridTemplateRows: '1fr',
   gridAutoColumns: 'auto 1fr',
   gridTemplateAreas: `'nav content' 'nav content'`,
+  boxSizing: 'border-box',
 });
 
 const TabNavContainer = css({
   gridArea: 'nav',
+  padding: '1rem 0',
 });
 
 const MainContainer = css({
   gridArea: 'content',
   overflowY: 'hidden',
-  height: '98vh',
+  height: '100vh',
   boxSizing: 'border-box',
 });
 

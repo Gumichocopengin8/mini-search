@@ -8,6 +8,7 @@ export const Container = css({
 });
 
 export const SearchBox = css({
+  paddingTop: '1rem',
   position: 'sticky',
   top: 0,
   backgroundColor: 'white',
