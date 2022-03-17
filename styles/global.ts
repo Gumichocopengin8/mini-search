@@ -6,3 +6,10 @@ export const Container = css({
   justifyContent: 'center',
   alignItems: 'center',
 });
+
+export const SearchBox = css({
+  position: 'sticky',
+  top: 0,
+  backgroundColor: 'white',
+  zIndex: 10,
+});

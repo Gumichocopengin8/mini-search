@@ -2,7 +2,7 @@ import { useContext } from 'react';
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import { css } from '@emotion/react';
-import TopTabBar from '@/components/common/topTabBar';
+import NavBar from '@/components/common/navbar';
 import { AppContext } from 'state/context';
 import { APIType } from 'state/contextReducer';
 import GiphyHome from '@/components/contents/giphy';
@@ -19,34 +19,49 @@ const Home: NextPage = () => {
         <meta name="description" content="API Search" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <header css={Header}>
-        <TopTabBar />
-      </header>
-      <main css={Main}>
-        <div style={{ display: apiType.currentTab === APIType.giphy ? 'block' : 'none' }}>
-          <GiphyHome />
-        </div>
-        <div style={{ display: apiType.currentTab === APIType.wikipedia ? 'block' : 'none' }}>
-          <WiKiHome />
-        </div>
-        <div style={{ display: apiType.currentTab === APIType.spotity ? 'block' : 'none' }}>
-          <SpotifyHome />
-        </div>
-      </main>
+      <div css={GridContainer}>
+        <nav css={TabNavContainer}>
+          <NavBar />
+        </nav>
+        <main css={[MainContainer, Main]}>
+          <div style={{ display: apiType.currentTab === APIType.giphy ? 'block' : 'none' }}>
+            <GiphyHome />
+          </div>
+          <div style={{ display: apiType.currentTab === APIType.wikipedia ? 'block' : 'none' }}>
+            <WiKiHome />
+          </div>
+          <div style={{ display: apiType.currentTab === APIType.spotity ? 'block' : 'none' }}>
+            <SpotifyHome />
+          </div>
+        </main>
+      </div>
     </div>
   );
 };
 
-const Header = css({
-  position: 'sticky',
-  top: 0,
-  zIndex: 100,
+const GridContainer = css({
+  display: 'grid',
+  gridTemplateRows: '1fr',
+  gridAutoColumns: 'auto 1fr',
+  gridTemplateAreas: `'nav content' 'nav content'`,
+});
+
+const TabNavContainer = css({
+  gridArea: 'nav',
+});
+
+const MainContainer = css({
+  gridArea: 'content',
+  overflowY: 'hidden',
+  height: '98vh',
+  boxSizing: 'border-box',
 });
 
 const Main = css({
-  margin: '2rem 0',
+  padding: '0 4rem',
   justifyContent: 'center',
   alignItems: 'center',
+  overflowY: 'auto',
 });
 
 export default Home;

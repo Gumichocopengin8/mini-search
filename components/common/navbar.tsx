@@ -3,7 +3,7 @@ import { Box, Tabs, Tab } from '@mui/material';
 import { APIType } from 'state/contextReducer';
 import { AppContext } from 'state/context';
 
-const TopTabBar = () => {
+const NavBar = () => {
   const { dispatch } = useContext(AppContext);
   const [tabValue, setTabValue] = useState<number>(0);
 
@@ -13,8 +13,8 @@ const TopTabBar = () => {
 
   return (
     <>
-      <Box sx={{ width: '100%', bgcolor: 'background.paper' }}>
-        <Tabs value={tabValue} onChange={onTabChange} centered>
+      <Box sx={{ display: 'flex', flexGrow: 1, bgcolor: 'background.paper' }}>
+        <Tabs value={tabValue} onChange={onTabChange} orientation="vertical">
           {Object.values(APIType).map((val) => (
             <Tab key={val} label={val} data-label={val} onClick={onChangeTab} />
           ))}
@@ -24,4 +24,4 @@ const TopTabBar = () => {
   );
 };
 
-export default TopTabBar;
+export default NavBar;

@@ -48,8 +48,10 @@ const GiphyHome = () => {
 
   return (
     <div>
-      <Typography variant="caption">Powered By GIPHY</Typography>
-      <MainInputField placeholder={'Giphy'} onSubmitFunc={onSetQuery} />
+      <div css={global.SearchBox}>
+        <Typography variant="caption">Powered By GIPHY</Typography>
+        <MainInputField placeholder={'Giphy'} onSubmitFunc={onSetQuery} />
+      </div>
 
       {giphyData.length > 0 ? (
         <>

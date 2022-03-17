@@ -20,7 +20,7 @@ const MainInputField = ({ placeholder, onSubmitFunc }: Props) => {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
-      <FormControl size="small" variant="outlined" fullWidth>
+      <FormControl size="small" variant="outlined">
         <OutlinedInput
           {...register('inputValue', { required: true })}
           type="search"

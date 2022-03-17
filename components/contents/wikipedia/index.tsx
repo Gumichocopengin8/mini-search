@@ -59,9 +59,10 @@ const WiKiHome = () => {
 
   return (
     <div>
-      <Typography variant="caption">Wikipedia</Typography>
-      <MainInputField placeholder={'Wikipedia'} onSubmitFunc={onSetQuery} />
-      {isError && <div>error</div>}
+      <div css={global.SearchBox}>
+        <Typography variant="caption">Wikipedia</Typography>
+        <MainInputField placeholder={'Wikipedia'} onSubmitFunc={onSetQuery} />
+      </div>
       {wikiSummaries.length > 0 ? (
         <>
           <Typography variant="subtitle2" component="div" gutterBottom>

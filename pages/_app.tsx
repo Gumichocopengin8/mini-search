@@ -13,12 +13,11 @@ function MyApp({ Component, pageProps }: AppProps) {
 }
 
 const Wrapper = css({
-  width: '80%',
-  maxWidth: '2000px',
-  minHeight: '100vh',
-  margin: '0 auto',
-  display: 'flex',
-  flexDirection: 'column',
+  minWidth: '100%',
+  minHeight: '100%',
+  padding: 0,
+  margin: 0,
+  overflowY: 'hidden',
 });
 
 export default MyApp;
