@@ -1,7 +1,22 @@
 export interface WikipediaSearchResult {
-  keyword: string;
-  titles: string[];
-  titleLinks: string[];
+  batchcomplete: string;
+  continue: {
+    sroffset: number;
+  };
+  query: {
+    searchinfo: {
+      totalhits: number;
+    };
+    search: [
+      {
+        title: string;
+        pageid: number;
+        size: number;
+        wordcount: number;
+        timestamp: number;
+      }
+    ];
+  };
 }
 
 export interface WikipediaPageSummary {
