@@ -1,6 +1,7 @@
 import { useContext } from 'react';
 import type { NextPage } from 'next';
 import Head from 'next/head';
+import { Divider } from '@mui/material';
 import { css } from '@emotion/react';
 import NavBar from '@/components/common/navbar';
 import { AppContext } from 'state/context';
@@ -22,6 +23,7 @@ const Home: NextPage = () => {
       <div css={GridContainer}>
         <nav css={TabNavContainer}>
           <NavBar />
+          <Divider orientation="vertical" />
         </nav>
         <main css={[MainContainer, Main]}>
           <div style={{ display: apiType.currentTab === APIType.giphy ? 'block' : 'none' }}>
@@ -50,6 +52,8 @@ const GridContainer = css({
 const TabNavContainer = css({
   gridArea: 'nav',
   padding: '1rem 0',
+  display: 'flex',
+  gap: '0.5rem',
 });
 
 const MainContainer = css({
@@ -60,7 +64,6 @@ const MainContainer = css({
 });
 
 const Main = css({
-  padding: '0 4rem',
   justifyContent: 'center',
   alignItems: 'center',
   overflowY: 'auto',

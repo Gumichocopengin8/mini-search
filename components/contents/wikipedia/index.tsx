@@ -65,9 +65,6 @@ const WiKiHome = () => {
       </div>
       {wikiSummaries.length > 0 ? (
         <>
-          <Typography variant="subtitle2" component="div" gutterBottom>
-            {totalHits} results
-          </Typography>
           <div css={global.Container}>
             <div css={ArticleColumn}>
               {wikiSummaries.map((summary) => (

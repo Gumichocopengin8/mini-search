@@ -55,9 +55,6 @@ const GiphyHome = () => {
 
       {giphyData.length > 0 ? (
         <>
-          <Typography variant="subtitle2" component="div" gutterBottom>
-            {totalHits} results
-          </Typography>
           <div css={global.Container}>
             <div css={Gallery}>
               {[0, 1, 2, 3].map((index) => (
