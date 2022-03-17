@@ -4,6 +4,7 @@ import { css } from '@emotion/react';
 import MainInputField from '@/components/common/searchFields/mainInputField';
 import { fetchGifSearchResultUsingGET } from 'api/giphy';
 import { GiphyData, PaginationInfo } from 'interfaces/giphy/search';
+import * as global from 'styles/global';
 
 const GiphyHome = () => {
   const ITEM_LIMIT = 40;
@@ -19,7 +20,6 @@ const GiphyHome = () => {
       if (!query) return;
       const data = await fetchGifSearchResultUsingGET(query, rating, 'en', ITEM_LIMIT, page);
       if (!unmounted && data.meta.status === 200) {
-        console.log(data.pagination);
         setGiphyData(data.data);
         setPaginationInfo(data.pagination);
       }
@@ -55,7 +55,7 @@ const GiphyHome = () => {
           <Typography variant="subtitle2" component="div" gutterBottom>
             {paginationInfo.total_count} results
           </Typography>
-          <div css={Container}>
+          <div css={global.Container}>
             <div css={Gallery}>
               {[0, 1, 2, 3].map((index) => (
                 <div key={index} css={GalleryColumn}>
@@ -81,20 +81,13 @@ const GiphyHome = () => {
           </div>
         </>
       ) : (
-        <div css={Container}>
+        <div css={global.Container}>
           <div>No results</div>
         </div>
       )}
     </div>
   );
 };
-
-const Container = css({
-  display: 'flex',
-  flexDirection: 'column',
-  justifyContent: 'center',
-  alignItems: 'center',
-});
 
 const Gallery = css({
   display: 'flex',
