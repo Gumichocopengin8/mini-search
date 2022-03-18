@@ -1,15 +1,5 @@
 import { useEffect, useState } from 'react';
-import {
-  Typography,
-  Card,
-  CardContent,
-  CardMedia,
-  CardActionArea,
-  FormGroup,
-  FormControl,
-  Box,
-  SelectChangeEvent,
-} from '@mui/material';
+import { Typography, FormGroup, FormControl, Box, SelectChangeEvent, CircularProgress } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import { css } from '@emotion/react';
 import MainInputField from '@/components/common/searchFields/mainInputField';
@@ -20,6 +10,7 @@ import PaginationView from '@/components/common/paginationView';
 import { languageData, WikiFormTypes } from 'data/wikipedia/data';
 import SelectBoxField from '@/components/common/searchFields/selectBoxField';
 import ErrorStackbar from '@/components/common/ErrorSnackbar';
+import WikiCard from './wikiCard';
 
 const WiKiHome = () => {
   const ITEM_LIMIT = 20;
@@ -28,6 +19,7 @@ const WiKiHome = () => {
   const [page, setPage] = useState<number>(1);
   const [totalHits, setTotalHits] = useState<number>(0);
   const [wikiSummaries, setWikiSummaries] = useState<WikipediaPageSummary[]>([]);
+  const [isLoading, setIsLoding] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
   const { register, handleSubmit, reset } = useForm<WikiFormTypes>();
 
@@ -36,6 +28,7 @@ const WiKiHome = () => {
     const func = async () => {
       if (!query) return;
       setIsError(false);
+      setIsLoding(true);
       try {
         const searchResult = await fetchWikiSearchResultUsingGET(query, ITEM_LIMIT, page, lang);
         const titlePromise = searchResult.query.search.map((search) =>
@@ -45,9 +38,11 @@ const WiKiHome = () => {
         if (!unmounted) {
           setWikiSummaries(titleSummaries);
           setTotalHits(searchResult.query.searchinfo.totalhits);
+          setIsLoding(false);
         }
       } catch (err) {
         console.error(err);
+        setIsLoding(false);
         setIsError(true);
       }
     };
@@ -60,7 +55,6 @@ const WiKiHome = () => {
 
   const onPageChange = (e: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
-    window.scrollTo(0, 0);
   };
 
   const onCloseError = (event?: React.SyntheticEvent | Event, reason?: string) => {
@@ -102,61 +96,45 @@ const WiKiHome = () => {
           </FormControl>
         </FormGroup>
       </Box>
-      {wikiSummaries.length > 0 ? (
-        <>
-          <div css={global.ResultContainer}>
-            <div css={ArticleColumn}>
-              {wikiSummaries.map((summary) => (
-                <Card sx={{ maxWidth: 600, width: '30%', minWidth: 270 }} key={summary.pageid} title={summary.title}>
-                  <CardActionArea>
-                    <a css={Anchor} href={summary.content_urls.desktop.page} target="_blank" rel="noopener noreferrer">
-                      <CardMedia
-                        component="img"
-                        height="250"
-                        image={
-                          summary.thumbnail?.source ??
-                          'https://upload.wikimedia.org/wikipedia/commons/8/80/Wikipedia-logo-v2.svg'
-                        }
-                        alt={summary.title}
-                      />
-                      <CardContent>
-                        <Typography gutterBottom variant="h6" component="div" css={global.OneLineEllipsis}>
-                          {summary.title}
-                        </Typography>
-                        <Typography variant="body2" color="text.secondary" css={global.MultiLineEllipsis}>
-                          {summary.extract}
-                        </Typography>
-                      </CardContent>
-                    </a>
-                  </CardActionArea>
-                </Card>
-              ))}
-            </div>
-            <PaginationView page={page} totalHits={totalHits} itemLimit={ITEM_LIMIT} onPageChange={onPageChange} />
-            <Typography variant="caption">Powered by Wikipedia</Typography>
-            <ErrorStackbar isError={isError} onCloseError={onCloseError} />
-          </div>
-        </>
-      ) : (
+      {isLoading ? (
         <div css={[global.ResultContainer, global.NoResultContainer]}>
-          {!query && wikiSummaries.length === 0 ? (
-            <>
-              <img
-                src="https://upload.wikimedia.org/wikipedia/commons/8/80/Wikipedia-logo-v2.svg"
-                width={240}
-                height={240}
-                alt="wiki image"
-              />
-              <Typography variant="h6" component="div">
-                Welcome to Wikipedia Search
-              </Typography>
-            </>
-          ) : (
-            <Typography variant="h6" component="div">
-              No results
-            </Typography>
-          )}
+          <CircularProgress />
         </div>
+      ) : (
+        <>
+          {wikiSummaries.length > 0 ? (
+            <div css={global.ResultContainer}>
+              <div css={ArticleColumn}>
+                {wikiSummaries.map((summary) => (
+                  <WikiCard key={summary.pageid} summary={summary} />
+                ))}
+              </div>
+              <PaginationView page={page} totalHits={totalHits} itemLimit={ITEM_LIMIT} onPageChange={onPageChange} />
+              <Typography variant="caption">Powered by Wikipedia</Typography>
+              <ErrorStackbar isError={isError} onCloseError={onCloseError} />
+            </div>
+          ) : (
+            <div css={[global.ResultContainer, global.NoResultContainer]}>
+              {!query && wikiSummaries.length === 0 ? (
+                <>
+                  <img
+                    src="https://upload.wikimedia.org/wikipedia/commons/8/80/Wikipedia-logo-v2.svg"
+                    width={240}
+                    height={240}
+                    alt="wiki image"
+                  />
+                  <Typography variant="h6" component="div">
+                    Welcome to Wikipedia Search
+                  </Typography>
+                </>
+              ) : (
+                <Typography variant="h6" component="div">
+                  No results
+                </Typography>
+              )}
+            </div>
+          )}
+        </>
       )}
     </div>
   );
@@ -168,11 +146,6 @@ const ArticleColumn = css({
   flexWrap: 'wrap',
   justifyContent: 'center',
   gap: '2rem',
-});
-
-const Anchor = css({
-  textDecoration: 'none',
-  color: 'darkgrey',
 });
 
 export default WiKiHome;

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Typography, Box, FormControl, FormGroup, SelectChangeEvent } from '@mui/material';
+import { Typography, Box, FormControl, FormGroup, SelectChangeEvent, CircularProgress } from '@mui/material';
 import { css } from '@emotion/react';
 import { useForm } from 'react-hook-form';
 import MainInputField from '@/components/common/searchFields/mainInputField';
@@ -18,6 +18,7 @@ const GiphyHome = () => {
   const [giphyData, setGiphyData] = useState<GiphyData[]>([]);
   const [page, setPage] = useState<number>(1);
   const [totalHits, setTotalHits] = useState<number>(0);
+  const [isLoading, setIsLoding] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
   const { register, handleSubmit, reset } = useForm<GiphyFormTypes>();
 
@@ -26,14 +27,17 @@ const GiphyHome = () => {
     const func = async () => {
       if (!query) return;
       setIsError(false);
+      setIsLoding(true);
       try {
         const data = await fetchGifSearchResultUsingGET(query, rating, 'en', ITEM_LIMIT, page);
         if (!unmounted && data.meta.status === 200) {
           setGiphyData(data.data);
           setTotalHits(data.pagination.total_count);
+          setIsLoding(false);
         }
       } catch (err) {
         console.error(err);
+        setIsError(false);
         setIsError(true);
       }
     };
@@ -88,47 +92,53 @@ const GiphyHome = () => {
           </FormControl>
         </FormGroup>
       </Box>
-      {giphyData.length > 0 ? (
-        <>
-          <div css={global.ResultContainer}>
-            <div css={Gallery}>
-              {[0, 1, 2, 3].map((index) => (
-                <div key={index} css={GalleryColumn}>
-                  {giphyData
-                    .filter((_, i) => i % 4 === index)
-                    .map((data) => (
-                      <a key={data.id} href={data.images.original.webp} target="_blank" rel="noopener noreferrer">
-                        <img src={data.images.original.webp} loading="lazy" css={ImageContent} />
-                      </a>
-                    ))}
-                </div>
-              ))}
-            </div>
-            <PaginationView page={page} totalHits={totalHits} itemLimit={ITEM_LIMIT} onPageChange={onPageChange} />
-            <Typography variant="caption">Powered By GIPHY</Typography>
-            <ErrorStackbar isError={isError} onCloseError={onCloseError} />
-          </div>
-        </>
-      ) : (
+      {isLoading ? (
         <div css={[global.ResultContainer, global.NoResultContainer]}>
-          {!query && giphyData.length === 0 ? (
-            <>
-              <img
-                src="https://upload.wikimedia.org/wikipedia/commons/7/76/Giphy_Logo_9.2016.svg"
-                width={500}
-                height={200}
-                alt="giphy image"
-              />
-              <Typography variant="h6" component="div">
-                Welcome to Giphy Search
-              </Typography>
-            </>
-          ) : (
-            <Typography variant="h6" component="div">
-              No results
-            </Typography>
-          )}
+          <CircularProgress />
         </div>
+      ) : (
+        <>
+          {giphyData.length > 0 ? (
+            <div css={global.ResultContainer}>
+              <div css={Gallery}>
+                {[0, 1, 2, 3].map((index) => (
+                  <div key={index} css={GalleryColumn}>
+                    {giphyData
+                      .filter((_, i) => i % 4 === index)
+                      .map((data) => (
+                        <a key={data.id} href={data.images.original.webp} target="_blank" rel="noopener noreferrer">
+                          <img src={data.images.original.webp} loading="lazy" css={ImageContent} />
+                        </a>
+                      ))}
+                  </div>
+                ))}
+              </div>
+              <PaginationView page={page} totalHits={totalHits} itemLimit={ITEM_LIMIT} onPageChange={onPageChange} />
+              <Typography variant="caption">Powered By GIPHY</Typography>
+              <ErrorStackbar isError={isError} onCloseError={onCloseError} />
+            </div>
+          ) : (
+            <div css={[global.ResultContainer, global.NoResultContainer]}>
+              {!query && giphyData.length === 0 ? (
+                <>
+                  <img
+                    src="https://upload.wikimedia.org/wikipedia/commons/7/76/Giphy_Logo_9.2016.svg"
+                    width={500}
+                    height={200}
+                    alt="giphy image"
+                  />
+                  <Typography variant="h6" component="div">
+                    Welcome to Giphy Search
+                  </Typography>
+                </>
+              ) : (
+                <Typography variant="h6" component="div">
+                  No results
+                </Typography>
+              )}
+            </div>
+          )}
+        </>
       )}
     </div>
   );
