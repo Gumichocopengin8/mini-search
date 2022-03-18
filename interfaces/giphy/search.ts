@@ -49,3 +49,10 @@ export interface GiphySearchResult {
   pagination: PaginationInfo;
   meta: Meta;
 }
+
+export interface GiphyAutoComplete {
+  data: {
+    name: string;
+  }[];
+  meta: Meta;
+}

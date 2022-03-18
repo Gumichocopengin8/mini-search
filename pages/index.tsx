@@ -8,7 +8,6 @@ import { AppContext } from 'state/context';
 import { APIType } from 'state/contextReducer';
 import GiphyHome from '@/components/contents/giphy';
 import WiKiHome from '@/components/contents/wikipedia';
-import SpotifyHome from '@/components/contents/spotify';
 
 const Home: NextPage = () => {
   const { apiType } = useContext(AppContext);
@@ -16,7 +15,7 @@ const Home: NextPage = () => {
   return (
     <div>
       <Head>
-        <title>Search</title>
+        <title>API Search</title>
         <meta name="description" content="API Search" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -31,9 +30,6 @@ const Home: NextPage = () => {
           </div>
           <div style={{ display: apiType.currentTab === APIType.wikipedia ? 'block' : 'none' }}>
             <WiKiHome />
-          </div>
-          <div style={{ display: apiType.currentTab === APIType.spotity ? 'block' : 'none' }}>
-            <SpotifyHome />
           </div>
         </main>
       </div>

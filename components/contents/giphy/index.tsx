@@ -11,6 +11,7 @@ const GiphyHome = () => {
   const ITEM_LIMIT = 40;
   const [query, setQuery] = useState<string>('');
   const [rating, setRating] = useState<string>('g');
+  const [lang, setLang] = useState<string>('en');
   const [giphyData, setGiphyData] = useState<GiphyData[]>([]);
   const [page, setPage] = useState<number>(1);
   const [totalHits, setTotalHits] = useState<number>(0);
@@ -19,7 +20,7 @@ const GiphyHome = () => {
     let unmounted = false;
     const func = async () => {
       if (!query) return;
-      const data = await fetchGifSearchResultUsingGET(query, rating, 'en', ITEM_LIMIT, page);
+      const data = await fetchGifSearchResultUsingGET(query, rating, lang, ITEM_LIMIT, page);
       if (!unmounted && data.meta.status === 200) {
         setGiphyData(data.data);
         setTotalHits(data.pagination.total_count);

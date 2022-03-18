@@ -7,15 +7,13 @@ export interface WikipediaSearchResult {
     searchinfo: {
       totalhits: number;
     };
-    search: [
-      {
-        title: string;
-        pageid: number;
-        size: number;
-        wordcount: number;
-        timestamp: number;
-      }
-    ];
+    search: {
+      title: string;
+      pageid: number;
+      size: number;
+      wordcount: number;
+      timestamp: number;
+    }[];
   };
 }
 
