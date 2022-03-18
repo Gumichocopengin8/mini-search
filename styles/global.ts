@@ -1,7 +1,13 @@
 import { css } from '@emotion/react';
 
 export const Container = css({
-  padding: '4rem',
+  minHeight: '100vh',
+  display: 'flex',
+  flexDirection: 'column',
+});
+
+export const ResultContainer = css({
+  padding: '5rem',
   display: 'flex',
   flexDirection: 'column',
   justifyContent: 'center',
@@ -9,6 +15,10 @@ export const Container = css({
 });
 
 export const SearchFormBox = css({
+  padding: '0 2rem',
+  display: 'flex',
+  justifyContent: 'space-between',
+  alignItems: 'center',
   position: 'sticky',
   top: 0,
   backgroundColor: 'white',
@@ -22,4 +32,21 @@ export const SearchForm = css({
   justifyContent: 'flex-end',
   alignItems: 'center',
   gap: '1rem',
+});
+
+export const NoResultContainer = css({
+  flex: 1,
+});
+
+export const OneLineEllipsis = css({
+  overflow: 'hidden',
+  textOverflow: 'ellipsis',
+  whiteSpace: 'nowrap',
+});
+
+export const MultiLineEllipsis = css({
+  display: '-webkit-box',
+  WebkitBoxOrient: 'vertical',
+  WebkitLineClamp: 5,
+  overflow: 'hidden',
 });

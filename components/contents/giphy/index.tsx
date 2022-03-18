@@ -8,23 +8,23 @@ import { GiphyData } from 'interfaces/giphy/search';
 import * as global from 'styles/global';
 import PaginationView from '@/components/common/paginationView';
 import SelectBoxField from '@/components/common/searchFields/selectBoxField';
-import { GiphyFormTypes, languageData, ratingData } from 'data/giphy/data';
+import { GiphyFormTypes, ratingData } from 'data/giphy/data';
 
 const GiphyHome = () => {
   const ITEM_LIMIT = 40;
   const [query, setQuery] = useState<string>('');
   const [rating, setRating] = useState<string>('g');
-  const [lang, setLang] = useState<string>('en');
   const [giphyData, setGiphyData] = useState<GiphyData[]>([]);
   const [page, setPage] = useState<number>(1);
   const [totalHits, setTotalHits] = useState<number>(0);
-  const { register, handleSubmit } = useForm<GiphyFormTypes>();
+  const [isError, setIsError] = useState<boolean>(false);
+  const { register, handleSubmit, reset } = useForm<GiphyFormTypes>();
 
   useEffect(() => {
     let unmounted = false;
     const func = async () => {
       if (!query) return;
-      const data = await fetchGifSearchResultUsingGET(query, rating, lang, ITEM_LIMIT, page);
+      const data = await fetchGifSearchResultUsingGET(query, rating, 'en', ITEM_LIMIT, page);
       if (!unmounted && data.meta.status === 200) {
         setGiphyData(data.data);
         setTotalHits(data.pagination.total_count);
@@ -35,7 +35,7 @@ const GiphyHome = () => {
       unmounted = true;
     };
     return cleanup;
-  }, [query, page, rating, lang]);
+  }, [query, page, rating]);
 
   const onPageChange = (e: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
@@ -43,22 +43,31 @@ const GiphyHome = () => {
   };
 
   const onChangeRating = (event: SelectChangeEvent) => setRating(event.target.value as string);
-  const onChangeLang = (event: SelectChangeEvent) => setLang(event.target.value as string);
 
   const onSubmit = ({ inputValue }: GiphyFormTypes) => {
     setPage(1);
     setQuery(inputValue);
   };
 
+  const onClickTitle = () => {
+    setQuery('');
+    setRating('g');
+    setPage(1);
+    setTotalHits(0);
+    setGiphyData([]);
+    setIsError(false);
+    reset();
+  };
+
   return (
-    <div>
+    <div css={global.Container}>
       <Box component="form" onSubmit={handleSubmit(onSubmit)} css={global.SearchFormBox}>
+        <Typography variant="h6" component="h1" onClick={onClickTitle} style={{ cursor: 'pointer' }}>
+          Giphy Search
+        </Typography>
         <FormGroup row={true} css={global.SearchForm}>
-          <FormControl sx={{ minWidth: 120 }} size="small">
-            <SelectBoxField label={'Rating'} value={rating} keywords={ratingData} onChangeValue={onChangeRating} />
-          </FormControl>
           <FormControl sx={{ minWidth: 200 }} size="small">
-            <SelectBoxField label={'Language'} value={lang} keywords={languageData} onChangeValue={onChangeLang} />
+            <SelectBoxField label={'Rating'} value={rating} keywords={ratingData} onChangeValue={onChangeRating} />
           </FormControl>
           <FormControl size="small">
             <MainInputField register={register('inputValue', { required: true })} placeholder={'Giphy'} />
@@ -67,14 +76,14 @@ const GiphyHome = () => {
       </Box>
       {giphyData.length > 0 ? (
         <>
-          <div css={global.Container}>
+          <div css={global.ResultContainer}>
             <div css={Gallery}>
               {[0, 1, 2, 3].map((index) => (
                 <div key={index} css={GalleryColumn}>
                   {giphyData
                     .filter((_, i) => i % 4 === index)
                     .map((data) => (
-                      <a key={data.id} href={data.images.original.webp}>
+                      <a key={data.id} href={data.images.original.webp} target="_blank" rel="noopener noreferrer">
                         <img src={data.images.original.webp} loading="lazy" css={ImageContent} />
                       </a>
                     ))}
@@ -86,8 +95,24 @@ const GiphyHome = () => {
           </div>
         </>
       ) : (
-        <div css={global.Container}>
-          <div>No results</div>
+        <div css={[global.ResultContainer, global.NoResultContainer]}>
+          {!query && giphyData.length === 0 ? (
+            <>
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/7/76/Giphy_Logo_9.2016.svg"
+                width={500}
+                height={200}
+                alt="giphy image"
+              />
+              <Typography variant="h6" component="div">
+                Welcome to Giphy Search
+              </Typography>
+            </>
+          ) : (
+            <Typography variant="h6" component="div">
+              No results
+            </Typography>
+          )}
         </div>
       )}
     </div>
@@ -96,22 +121,19 @@ const GiphyHome = () => {
 
 const Gallery = css({
   display: 'flex',
-  flexWrap: 'wrap',
-  justifyContent: 'inherit',
   gap: '0.5rem',
 });
 
 const GalleryColumn = css({
-  width: '20%',
+  width: 'auto',
   display: 'flex',
-  flexWrap: 'wrap',
   flexDirection: 'column',
   gap: '0.5rem',
 });
 
 const ImageContent = css({
   width: '100%',
-  objectFit: 'contain',
+  height: '100%',
 });
 
 export default GiphyHome;

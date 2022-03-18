@@ -30,7 +30,7 @@ const WiKiHome = () => {
   const [totalHits, setTotalHits] = useState<number>(0);
   const [wikiSummaries, setWikiSummaries] = useState<WikipediaPageSummary[]>([]);
   const [isError, setIsError] = useState<boolean>(false);
-  const { register, handleSubmit } = useForm<WikiFormTypes>();
+  const { register, handleSubmit, reset } = useForm<WikiFormTypes>();
 
   useEffect(() => {
     let unmounted = false;
@@ -73,26 +73,37 @@ const WiKiHome = () => {
     setQuery(inputValue);
   };
 
+  const onClickTitle = () => {
+    setQuery('');
+    setLang('en');
+    setPage(1);
+    setTotalHits(0);
+    setWikiSummaries([]);
+    setIsError(false);
+    reset();
+  };
+
   return (
-    <div>
-      <div>
-        <Box component="form" onSubmit={handleSubmit(onSubmit)} css={global.SearchFormBox}>
-          <FormGroup row={true} css={global.SearchForm}>
-            <FormControl sx={{ minWidth: 200 }} size="small">
-              <SelectBoxField label={'Language'} value={lang} keywords={languageData} onChangeValue={onChangeLang} />
-            </FormControl>
-            <FormControl size="small">
-              <MainInputField register={register('inputValue', { required: true })} placeholder={'Wikipedia'} />
-            </FormControl>
-          </FormGroup>
-        </Box>
-      </div>
+    <div css={global.Container}>
+      <Box component="form" onSubmit={handleSubmit(onSubmit)} css={global.SearchFormBox}>
+        <Typography variant="h6" component="h1" onClick={onClickTitle} style={{ cursor: 'pointer' }}>
+          Wikipedia Search
+        </Typography>
+        <FormGroup row={true} css={global.SearchForm}>
+          <FormControl sx={{ minWidth: 200 }} size="small">
+            <SelectBoxField label={'Language'} value={lang} keywords={languageData} onChangeValue={onChangeLang} />
+          </FormControl>
+          <FormControl size="small">
+            <MainInputField register={register('inputValue', { required: true })} placeholder={'Wikipedia'} />
+          </FormControl>
+        </FormGroup>
+      </Box>
       {wikiSummaries.length > 0 ? (
         <>
-          <div css={global.Container}>
+          <div css={global.ResultContainer}>
             <div css={ArticleColumn}>
               {wikiSummaries.map((summary) => (
-                <Card sx={{ maxWidth: 500, width: 500 }} key={summary.pageid}>
+                <Card sx={{ maxWidth: 600, width: '30%', minWidth: 270 }} key={summary.pageid} title={summary.title}>
                   <CardActionArea>
                     <a css={Anchor} href={summary.content_urls.desktop.page} target="_blank" rel="noopener noreferrer">
                       <CardMedia
@@ -105,10 +116,10 @@ const WiKiHome = () => {
                         alt={summary.title}
                       />
                       <CardContent>
-                        <Typography gutterBottom variant="h6" component="div">
+                        <Typography gutterBottom variant="h6" component="div" css={global.OneLineEllipsis}>
                           {summary.title}
                         </Typography>
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography variant="body2" color="text.secondary" css={global.MultiLineEllipsis}>
                           {summary.extract}
                         </Typography>
                       </CardContent>
@@ -132,8 +143,24 @@ const WiKiHome = () => {
           </div>
         </>
       ) : (
-        <div css={global.Container}>
-          <div>No results</div>
+        <div css={[global.ResultContainer, global.NoResultContainer]}>
+          {!query && wikiSummaries.length === 0 ? (
+            <>
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/8/80/Wikipedia-logo-v2.svg"
+                width={240}
+                height={240}
+                alt="wiki image"
+              />
+              <Typography variant="h6" component="div">
+                Welcome to Wikipedia Search
+              </Typography>
+            </>
+          ) : (
+            <Typography variant="h6" component="div">
+              No results
+            </Typography>
+          )}
         </div>
       )}
     </div>

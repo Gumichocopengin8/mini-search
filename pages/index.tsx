@@ -54,15 +54,14 @@ const TabNavContainer = css({
 
 const MainContainer = css({
   gridArea: 'content',
-  overflowY: 'hidden',
+  minWidth: '840px',
   height: '100vh',
+  overflowY: 'hidden',
   boxSizing: 'border-box',
 });
 
 const Main = css({
-  justifyContent: 'center',
-  alignItems: 'center',
-  overflowY: 'auto',
+  overflowY: 'scroll',
 });
 
 export default Home;

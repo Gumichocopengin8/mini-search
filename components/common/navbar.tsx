@@ -14,7 +14,7 @@ const NavBar = () => {
 
   return (
     <div css={NavContainer}>
-      <Typography variant="h6" gutterBottom component="h1">
+      <Typography variant="h6" gutterBottom component="div">
         API Search
       </Typography>
       <Box sx={{ display: 'flex', flexGrow: 1, bgcolor: 'background.paper' }}>
