@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
 import { Typography, FormGroup, FormControl, Box, SelectChangeEvent, CircularProgress } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import { css } from '@emotion/react';
@@ -11,10 +12,12 @@ import { languageData, WikiFormTypes } from 'data/wikipedia/data';
 import SelectBoxField from '@/components/common/searchFields/selectBoxField';
 import ErrorStackbar from '@/components/common/ErrorSnackbar';
 import WikiCard from './wikiCard';
+import { APIType } from 'state/contextReducer';
 
 const WiKiHome = () => {
   const ITEM_LIMIT = 20;
-  const [query, setQuery] = useState<string>('');
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [lang, setLang] = useState<string>('en');
   const [page, setPage] = useState<number>(1);
   const [totalHits, setTotalHits] = useState<number>(0);
@@ -24,13 +27,20 @@ const WiKiHome = () => {
   const { register, handleSubmit, reset } = useForm<WikiFormTypes>();
 
   useEffect(() => {
+    if (!router.isReady) return;
+    setSearchQuery(String(router.query?.query ?? ''));
+    setLang(String(router.query?.lang ?? 'en'));
+    setPage(Number(router.query?.page ?? 1));
+  }, [router.isReady]);
+
+  useEffect(() => {
     let unmounted = false;
     const func = async () => {
-      if (!query) return;
+      if (!searchQuery) return;
       setIsError(false);
       setIsLoding(true);
       try {
-        const searchResult = await fetchWikiSearchResultUsingGET(query, ITEM_LIMIT, page, lang);
+        const searchResult = await fetchWikiSearchResultUsingGET(searchQuery, ITEM_LIMIT, page, lang);
         const titlePromise = searchResult.query.search.map((search) =>
           fetchWikiPageSummaryUsingGET(search.title, lang)
         );
@@ -51,34 +61,53 @@ const WiKiHome = () => {
       unmounted = true;
     };
     return cleanup;
-  }, [query, page, lang]);
+  }, [searchQuery, page, lang]);
 
   const onPageChange = (e: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
+    router.push({
+      pathname: '/',
+      query: { ref: APIType.wikipedia, query: searchQuery, lang: lang, page: value },
+    });
   };
 
-  const onCloseError = (event?: React.SyntheticEvent | Event, reason?: string) => {
+  const onCloseError = (e?: React.SyntheticEvent | Event, reason?: string) => {
     if (reason === 'clickaway') {
       return;
     }
     setIsError(false);
   };
 
-  const onChangeLang = (e: SelectChangeEvent) => setLang(e.target.value as string);
+  const onChangeLang = (e: SelectChangeEvent) => {
+    const newLang = e.target.value as string;
+    setLang(newLang);
+    router.push({
+      pathname: '/',
+      query: { ref: APIType.wikipedia, query: searchQuery, lang: newLang, page: page },
+    });
+  };
 
   const onSubmit = ({ inputValue }: WikiFormTypes) => {
     setPage(1);
-    setQuery(inputValue);
+    setSearchQuery(inputValue);
+    router.push({
+      pathname: '/',
+      query: { ref: APIType.wikipedia, query: inputValue, lang: lang, page: 1 },
+    });
   };
 
   const onClickTitle = () => {
-    setQuery('');
+    setSearchQuery('');
     setLang('en');
     setPage(1);
     setTotalHits(0);
     setWikiSummaries([]);
     setIsError(false);
     reset();
+    router.push({
+      pathname: '/',
+      query: { ref: APIType.wikipedia },
+    });
   };
 
   return (
@@ -109,13 +138,21 @@ const WiKiHome = () => {
                   <WikiCard key={summary.pageid} summary={summary} />
                 ))}
               </div>
-              <PaginationView page={page} totalHits={totalHits} itemLimit={ITEM_LIMIT} onPageChange={onPageChange} />
+              <PaginationView
+                page={page}
+                totalHits={totalHits}
+                itemLimit={ITEM_LIMIT}
+                //  Up to 10000 search results are supported
+                // example: https://en.wikipedia.org/w/api.php?action=query&srsearch=s&srlimit=20&sroffset=10000&list=search&format=json&utf8=&origin=*
+                API_CALL_LIMIT={10000}
+                onPageChange={onPageChange}
+              />
               <Typography variant="caption">Powered by Wikipedia</Typography>
               <ErrorStackbar isError={isError} onCloseError={onCloseError} />
             </div>
           ) : (
             <div css={[global.ResultContainer, global.NoResultContainer]}>
-              {!query && wikiSummaries.length === 0 ? (
+              {!searchQuery && wikiSummaries.length === 0 ? (
                 <>
                   <img
                     src="https://upload.wikimedia.org/wikipedia/commons/8/80/Wikipedia-logo-v2.svg"

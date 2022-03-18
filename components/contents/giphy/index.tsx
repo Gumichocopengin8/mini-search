@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/router';
 import { Typography, Box, FormControl, FormGroup, SelectChangeEvent, CircularProgress } from '@mui/material';
 import { css } from '@emotion/react';
 import { useForm } from 'react-hook-form';
@@ -10,10 +11,12 @@ import PaginationView from '@/components/common/paginationView';
 import SelectBoxField from '@/components/common/searchFields/selectBoxField';
 import { GiphyFormTypes, ratingData } from 'data/giphy/data';
 import ErrorStackbar from '@/components/common/ErrorSnackbar';
+import { APIType } from 'state/contextReducer';
 
 const GiphyHome = () => {
   const ITEM_LIMIT = 40;
-  const [query, setQuery] = useState<string>('');
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [rating, setRating] = useState<string>('g');
   const [giphyData, setGiphyData] = useState<GiphyData[]>([]);
   const [page, setPage] = useState<number>(1);
@@ -23,13 +26,20 @@ const GiphyHome = () => {
   const { register, handleSubmit, reset } = useForm<GiphyFormTypes>();
 
   useEffect(() => {
+    if (!router.isReady) return;
+    setSearchQuery(String(router.query?.query ?? ''));
+    setRating(String(router.query?.rating ?? 'g'));
+    setPage(Number(router.query?.page ?? 1));
+  }, [router]);
+
+  useEffect(() => {
     let unmounted = false;
     const func = async () => {
-      if (!query) return;
+      if (!searchQuery) return;
       setIsError(false);
       setIsLoding(true);
       try {
-        const data = await fetchGifSearchResultUsingGET(query, rating, 'en', ITEM_LIMIT, page);
+        const data = await fetchGifSearchResultUsingGET(searchQuery, rating, 'en', ITEM_LIMIT, page);
         if (!unmounted && data.meta.status === 200) {
           setGiphyData(data.data);
           setTotalHits(data.pagination.total_count);
@@ -46,14 +56,24 @@ const GiphyHome = () => {
       unmounted = true;
     };
     return cleanup;
-  }, [query, page, rating]);
+  }, [searchQuery, page, rating]);
 
   const onPageChange = (e: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
-    window.scrollTo(0, 0);
+    router.push({
+      pathname: '/',
+      query: { ref: APIType.giphy, page: value, rating: rating, query: searchQuery },
+    });
   };
 
-  const onChangeRating = (event: SelectChangeEvent) => setRating(event.target.value as string);
+  const onChangeRating = (event: SelectChangeEvent) => {
+    const newRating = event.target.value as string;
+    setRating(newRating);
+    router.push({
+      pathname: '/',
+      query: { ref: APIType.giphy, page: page, rating: newRating, query: searchQuery },
+    });
+  };
 
   const onCloseError = (event?: React.SyntheticEvent | Event, reason?: string) => {
     if (reason === 'clickaway') {
@@ -64,17 +84,25 @@ const GiphyHome = () => {
 
   const onSubmit = ({ inputValue }: GiphyFormTypes) => {
     setPage(1);
-    setQuery(inputValue);
+    setSearchQuery(inputValue);
+    router.push({
+      pathname: '/',
+      query: { ref: APIType.giphy, query: inputValue, rating: rating, page: 1 },
+    });
   };
 
   const onClickTitle = () => {
-    setQuery('');
+    setSearchQuery('');
     setRating('g');
     setPage(1);
     setTotalHits(0);
     setGiphyData([]);
     setIsError(false);
     reset();
+    router.push({
+      pathname: '/',
+      query: { ref: APIType.giphy },
+    });
   };
 
   return (
@@ -113,13 +141,19 @@ const GiphyHome = () => {
                   </div>
                 ))}
               </div>
-              <PaginationView page={page} totalHits={totalHits} itemLimit={ITEM_LIMIT} onPageChange={onPageChange} />
+              <PaginationView
+                page={page}
+                totalHits={totalHits}
+                itemLimit={ITEM_LIMIT}
+                API_CALL_LIMIT={5000}
+                onPageChange={onPageChange}
+              />
               <Typography variant="caption">Powered By GIPHY</Typography>
               <ErrorStackbar isError={isError} onCloseError={onCloseError} />
             </div>
           ) : (
             <div css={[global.ResultContainer, global.NoResultContainer]}>
-              {!query && giphyData.length === 0 ? (
+              {!searchQuery && giphyData.length === 0 ? (
                 <>
                   <img
                     src="https://upload.wikimedia.org/wikipedia/commons/7/76/Giphy_Logo_9.2016.svg"

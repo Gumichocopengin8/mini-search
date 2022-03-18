@@ -5,21 +5,18 @@ interface Props {
   page: number;
   totalHits: number;
   itemLimit: number;
+  API_CALL_LIMIT: number;
   onPageChange: (e: React.ChangeEvent<unknown>, value: number) => void;
 }
 
-const PaginationView = ({ page, totalHits, itemLimit, onPageChange }: Props) => {
-  //  Up to 10000 search results are supported
-  // example: https://en.wikipedia.org/w/api.php?action=query&srsearch=s&srlimit=20&sroffset=10000&list=search&format=json&utf8=&origin=*
-  const WIKIPEDIA_API_LIMIT = 10000;
-
+const PaginationView = ({ page, totalHits, itemLimit, API_CALL_LIMIT, onPageChange }: Props) => {
   return (
     <Stack spacing={2} css={PagenationItem}>
       <Pagination
         shape="rounded"
         page={page}
         size="large"
-        count={totalHits < WIKIPEDIA_API_LIMIT ? Math.ceil(totalHits / itemLimit) : WIKIPEDIA_API_LIMIT / itemLimit}
+        count={totalHits < API_CALL_LIMIT ? Math.ceil(totalHits / itemLimit) : API_CALL_LIMIT / itemLimit}
         onChange={onPageChange}
       />
     </Stack>

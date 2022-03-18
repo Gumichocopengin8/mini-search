@@ -11,9 +11,9 @@ const MainInputField = ({ register, placeholder }: Props) => {
   return (
     <OutlinedInput
       {...register}
+      key="MainInputField"
       type="search"
       placeholder={`Search on ${placeholder}`}
-      defaultValue=""
       autoComplete="off"
       autoFocus
       style={{ marginBottom: '1rem' }}

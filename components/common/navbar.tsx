@@ -1,16 +1,28 @@
-import { useContext, useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/router';
 import { css } from '@emotion/react';
 import { Box, Tabs, Tab, Typography } from '@mui/material';
 import { APIType } from 'state/contextReducer';
-import { AppContext } from 'state/context';
 
 const NavBar = () => {
-  const { dispatch } = useContext(AppContext);
+  const router = useRouter();
   const [tabValue, setTabValue] = useState<number>(0);
+
+  useEffect(() => {
+    if (!router.isReady) return;
+    const currentTab = String(router.query?.ref ?? APIType.wikipedia);
+    setTabValue(currentTab === APIType.wikipedia ? 0 : 1);
+  }, [router.isReady]);
 
   const onTabChange = (event: React.SyntheticEvent, newValue: number) => setTabValue(newValue);
 
-  const onChangeTab = (e: any) => dispatch({ type: e.target.dataset.label });
+  const onChangeTab = (e: any) => {
+    const label = e.target.dataset.label;
+    router.push({
+      pathname: '/',
+      query: { ref: label },
+    });
+  };
 
   return (
     <div css={NavContainer}>

@@ -1,6 +1,6 @@
 export enum APIType {
-  wikipedia = 'Wikipedia',
-  giphy = 'Giphy',
+  wikipedia = 'wikipedia',
+  giphy = 'giphy',
 }
 
 export type TabViewProps = {
