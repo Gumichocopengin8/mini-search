@@ -9,6 +9,7 @@ import * as global from 'styles/global';
 import PaginationView from '@/components/common/paginationView';
 import SelectBoxField from '@/components/common/searchFields/selectBoxField';
 import { GiphyFormTypes, ratingData } from 'data/giphy/data';
+import ErrorStackbar from '@/components/common/ErrorSnackbar';
 
 const GiphyHome = () => {
   const ITEM_LIMIT = 40;
@@ -24,10 +25,16 @@ const GiphyHome = () => {
     let unmounted = false;
     const func = async () => {
       if (!query) return;
-      const data = await fetchGifSearchResultUsingGET(query, rating, 'en', ITEM_LIMIT, page);
-      if (!unmounted && data.meta.status === 200) {
-        setGiphyData(data.data);
-        setTotalHits(data.pagination.total_count);
+      setIsError(false);
+      try {
+        const data = await fetchGifSearchResultUsingGET(query, rating, 'en', ITEM_LIMIT, page);
+        if (!unmounted && data.meta.status === 200) {
+          setGiphyData(data.data);
+          setTotalHits(data.pagination.total_count);
+        }
+      } catch (err) {
+        console.error(err);
+        setIsError(true);
       }
     };
     func();
@@ -43,6 +50,13 @@ const GiphyHome = () => {
   };
 
   const onChangeRating = (event: SelectChangeEvent) => setRating(event.target.value as string);
+
+  const onCloseError = (event?: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setIsError(false);
+  };
 
   const onSubmit = ({ inputValue }: GiphyFormTypes) => {
     setPage(1);
@@ -92,6 +106,7 @@ const GiphyHome = () => {
             </div>
             <PaginationView page={page} totalHits={totalHits} itemLimit={ITEM_LIMIT} onPageChange={onPageChange} />
             <Typography variant="caption">Powered By GIPHY</Typography>
+            <ErrorStackbar isError={isError} onCloseError={onCloseError} />
           </div>
         </>
       ) : (

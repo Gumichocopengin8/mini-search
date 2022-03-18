@@ -5,8 +5,6 @@ import {
   CardContent,
   CardMedia,
   CardActionArea,
-  Snackbar,
-  Alert,
   FormGroup,
   FormControl,
   Box,
@@ -21,6 +19,7 @@ import * as global from 'styles/global';
 import PaginationView from '@/components/common/paginationView';
 import { languageData, WikiFormTypes } from 'data/wikipedia/data';
 import SelectBoxField from '@/components/common/searchFields/selectBoxField';
+import ErrorStackbar from '@/components/common/ErrorSnackbar';
 
 const WiKiHome = () => {
   const ITEM_LIMIT = 20;
@@ -64,7 +63,12 @@ const WiKiHome = () => {
     window.scrollTo(0, 0);
   };
 
-  const onCloseError = () => setIsError(false);
+  const onCloseError = (event?: React.SyntheticEvent | Event, reason?: string) => {
+    if (reason === 'clickaway') {
+      return;
+    }
+    setIsError(false);
+  };
 
   const onChangeLang = (e: SelectChangeEvent) => setLang(e.target.value as string);
 
@@ -130,16 +134,7 @@ const WiKiHome = () => {
             </div>
             <PaginationView page={page} totalHits={totalHits} itemLimit={ITEM_LIMIT} onPageChange={onPageChange} />
             <Typography variant="caption">Powered by Wikipedia</Typography>
-            <Snackbar
-              anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-              open={isError}
-              autoHideDuration={3000}
-              onClick={onCloseError}
-            >
-              <Alert variant="filled" onClick={onCloseError} severity="error" sx={{ width: '100%' }}>
-                Data fetch error
-              </Alert>
-            </Snackbar>
+            <ErrorStackbar isError={isError} onCloseError={onCloseError} />
           </div>
         </>
       ) : (
