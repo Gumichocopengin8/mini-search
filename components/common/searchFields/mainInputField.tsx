@@ -1,44 +1,30 @@
-import { FormControl, InputAdornment, IconButton, OutlinedInput } from '@mui/material';
+import { InputAdornment, IconButton, OutlinedInput } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
-import { useForm } from 'react-hook-form';
-
-type FormData = {
-  inputValue: string;
-};
+import { UseFormRegisterReturn } from 'react-hook-form';
 
 interface Props {
   placeholder: string;
-  onSubmitFunc: (query: string) => void;
+  register: UseFormRegisterReturn;
 }
 
-const MainInputField = ({ placeholder, onSubmitFunc }: Props) => {
-  const { register, handleSubmit } = useForm<FormData>();
-
-  const onSubmit = ({ inputValue }: FormData) => {
-    onSubmitFunc(inputValue.trim());
-  };
-
+const MainInputField = ({ register, placeholder }: Props) => {
   return (
-    <form onSubmit={handleSubmit(onSubmit)}>
-      <FormControl size="small" variant="outlined">
-        <OutlinedInput
-          {...register('inputValue', { required: true })}
-          type="search"
-          placeholder={`Search on ${placeholder}`}
-          defaultValue=""
-          autoComplete="off"
-          autoFocus
-          style={{ marginBottom: '1rem' }}
-          endAdornment={
-            <InputAdornment position="end">
-              <IconButton type="submit" edge="end" size="large">
-                <SearchIcon />
-              </IconButton>
-            </InputAdornment>
-          }
-        />
-      </FormControl>
-    </form>
+    <OutlinedInput
+      {...register}
+      type="search"
+      placeholder={`Search on ${placeholder}`}
+      defaultValue=""
+      autoComplete="off"
+      autoFocus
+      style={{ marginBottom: '1rem' }}
+      endAdornment={
+        <InputAdornment position="end">
+          <IconButton type="submit" edge="end" size="large">
+            <SearchIcon />
+          </IconButton>
+        </InputAdornment>
+      }
+    />
   );
 };
 

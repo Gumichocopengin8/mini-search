@@ -5,7 +5,7 @@ interface Props {
   page: number;
   totalHits: number;
   itemLimit: number;
-  onPageChange: (e: any, value: number) => void;
+  onPageChange: (e: React.ChangeEvent<unknown>, value: number) => void;
 }
 
 const PaginationView = ({ page, totalHits, itemLimit, onPageChange }: Props) => {
@@ -23,7 +23,7 @@ const PaginationView = ({ page, totalHits, itemLimit, onPageChange }: Props) => 
 };
 
 const PagenationItem = css({
-  padding: '4rem 0',
+  padding: '4rem 0 0',
 });
 
 export default PaginationView;

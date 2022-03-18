@@ -1,11 +1,26 @@
 import { useEffect, useState } from 'react';
-import { Typography, Card, CardContent, CardMedia, CardActionArea, Snackbar, Alert } from '@mui/material';
+import {
+  Typography,
+  Card,
+  CardContent,
+  CardMedia,
+  CardActionArea,
+  Snackbar,
+  Alert,
+  FormGroup,
+  FormControl,
+  Box,
+  SelectChangeEvent,
+} from '@mui/material';
+import { useForm } from 'react-hook-form';
 import { css } from '@emotion/react';
 import MainInputField from '@/components/common/searchFields/mainInputField';
 import { fetchWikiSearchResultUsingGET, fetchWikiPageSummaryUsingGET } from 'api/wikipedia';
 import { WikipediaPageSummary } from 'interfaces/wikipedia/search';
 import * as global from 'styles/global';
 import PaginationView from '@/components/common/paginationView';
+import { languageData, WikiFormTypes } from 'data/wikipedia/data';
+import SelectBoxField from '@/components/common/searchFields/selectBoxField';
 
 const WiKiHome = () => {
   const ITEM_LIMIT = 20;
@@ -15,6 +30,7 @@ const WiKiHome = () => {
   const [totalHits, setTotalHits] = useState<number>(0);
   const [wikiSummaries, setWikiSummaries] = useState<WikipediaPageSummary[]>([]);
   const [isError, setIsError] = useState<boolean>(false);
+  const { register, handleSubmit } = useForm<WikiFormTypes>();
 
   useEffect(() => {
     let unmounted = false;
@@ -23,7 +39,9 @@ const WiKiHome = () => {
       setIsError(false);
       try {
         const searchResult = await fetchWikiSearchResultUsingGET(query, ITEM_LIMIT, page, lang);
-        const titlePromise = searchResult.query.search.map((search) => fetchWikiPageSummaryUsingGET(search.title));
+        const titlePromise = searchResult.query.search.map((search) =>
+          fetchWikiPageSummaryUsingGET(search.title, lang)
+        );
         const titleSummaries = await Promise.all(titlePromise);
         if (!unmounted) {
           setWikiSummaries(titleSummaries);
@@ -39,29 +57,35 @@ const WiKiHome = () => {
       unmounted = true;
     };
     return cleanup;
-  }, [query, page]);
+  }, [query, page, lang]);
 
-  const onSetQuery = (query: string) => {
-    setQuery((state) => {
-      if (state !== query) {
-        setPage(1);
-      }
-      return query;
-    });
-  };
-
-  const onPageChange = (e: any, value: number) => {
+  const onPageChange = (e: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
     window.scrollTo(0, 0);
   };
 
   const onCloseError = () => setIsError(false);
 
+  const onChangeLang = (e: SelectChangeEvent) => setLang(e.target.value as string);
+
+  const onSubmit = ({ inputValue }: WikiFormTypes) => {
+    setPage(1);
+    setQuery(inputValue);
+  };
+
   return (
     <div>
-      <div css={global.SearchBox}>
-        <Typography variant="caption">Wikipedia</Typography>
-        <MainInputField placeholder={'Wikipedia'} onSubmitFunc={onSetQuery} />
+      <div>
+        <Box component="form" onSubmit={handleSubmit(onSubmit)} css={global.SearchFormBox}>
+          <FormGroup row={true} css={global.SearchForm}>
+            <FormControl sx={{ minWidth: 200 }} size="small">
+              <SelectBoxField label={'Language'} value={lang} keywords={languageData} onChangeValue={onChangeLang} />
+            </FormControl>
+            <FormControl size="small">
+              <MainInputField register={register('inputValue', { required: true })} placeholder={'Wikipedia'} />
+            </FormControl>
+          </FormGroup>
+        </Box>
       </div>
       {wikiSummaries.length > 0 ? (
         <>
@@ -94,6 +118,7 @@ const WiKiHome = () => {
               ))}
             </div>
             <PaginationView page={page} totalHits={totalHits} itemLimit={ITEM_LIMIT} onPageChange={onPageChange} />
+            <Typography variant="caption">Powered by Wikipedia</Typography>
             <Snackbar
               anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
               open={isError}

@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react';
-import { Typography } from '@mui/material';
+import { Typography, Box, FormControl, FormGroup, SelectChangeEvent } from '@mui/material';
 import { css } from '@emotion/react';
+import { useForm } from 'react-hook-form';
 import MainInputField from '@/components/common/searchFields/mainInputField';
 import { fetchGifSearchResultUsingGET } from 'api/giphy';
 import { GiphyData } from 'interfaces/giphy/search';
 import * as global from 'styles/global';
 import PaginationView from '@/components/common/paginationView';
+import SelectBoxField from '@/components/common/searchFields/selectBoxField';
+import { GiphyFormTypes, languageData, ratingData } from 'data/giphy/data';
 
 const GiphyHome = () => {
   const ITEM_LIMIT = 40;
@@ -15,6 +18,7 @@ const GiphyHome = () => {
   const [giphyData, setGiphyData] = useState<GiphyData[]>([]);
   const [page, setPage] = useState<number>(1);
   const [totalHits, setTotalHits] = useState<number>(0);
+  const { register, handleSubmit } = useForm<GiphyFormTypes>();
 
   useEffect(() => {
     let unmounted = false;
@@ -31,29 +35,36 @@ const GiphyHome = () => {
       unmounted = true;
     };
     return cleanup;
-  }, [query, page]);
+  }, [query, page, rating, lang]);
 
-  const onSetQuery = (query: string) => {
-    setQuery((state) => {
-      if (state !== query) {
-        setPage(1);
-      }
-      return query;
-    });
-  };
-
-  const onPageChange = (e: any, value: number) => {
+  const onPageChange = (e: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
     window.scrollTo(0, 0);
   };
 
+  const onChangeRating = (event: SelectChangeEvent) => setRating(event.target.value as string);
+  const onChangeLang = (event: SelectChangeEvent) => setLang(event.target.value as string);
+
+  const onSubmit = ({ inputValue }: GiphyFormTypes) => {
+    setPage(1);
+    setQuery(inputValue);
+  };
+
   return (
     <div>
-      <div css={global.SearchBox}>
-        <Typography variant="caption">Powered By GIPHY</Typography>
-        <MainInputField placeholder={'Giphy'} onSubmitFunc={onSetQuery} />
-      </div>
-
+      <Box component="form" onSubmit={handleSubmit(onSubmit)} css={global.SearchFormBox}>
+        <FormGroup row={true} css={global.SearchForm}>
+          <FormControl sx={{ minWidth: 120 }} size="small">
+            <SelectBoxField label={'Rating'} value={rating} keywords={ratingData} onChangeValue={onChangeRating} />
+          </FormControl>
+          <FormControl sx={{ minWidth: 200 }} size="small">
+            <SelectBoxField label={'Language'} value={lang} keywords={languageData} onChangeValue={onChangeLang} />
+          </FormControl>
+          <FormControl size="small">
+            <MainInputField register={register('inputValue', { required: true })} placeholder={'Giphy'} />
+          </FormControl>
+        </FormGroup>
+      </Box>
       {giphyData.length > 0 ? (
         <>
           <div css={global.Container}>
@@ -71,6 +82,7 @@ const GiphyHome = () => {
               ))}
             </div>
             <PaginationView page={page} totalHits={totalHits} itemLimit={ITEM_LIMIT} onPageChange={onPageChange} />
+            <Typography variant="caption">Powered By GIPHY</Typography>
           </div>
         </>
       ) : (
