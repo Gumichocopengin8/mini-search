@@ -21,7 +21,12 @@ export const fetchWikiSearchResultUsingGET = async (
         origin: '*',
       },
     })
-    .then((res) => res.data as WikipediaSearchResult)
+    .then((res) => {
+      if (res.status !== 200) {
+        throw new Error(`fetch wikipedia search result with ${res.status} error`);
+      }
+      return res.data as WikipediaSearchResult;
+    })
     .catch((err) => {
       console.error(err);
       throw new Error('failed to fetch wikipedia search result');
@@ -31,7 +36,12 @@ export const fetchWikiSearchResultUsingGET = async (
 export const fetchWikiPageSummaryUsingGET = async (title: string, lang = 'en'): Promise<WikipediaPageSummary> => {
   return wikiAxios(lang)
     .get(`/api/rest_v1/page/summary/${encodeURIComponent(title)}`)
-    .then((res) => res.data as WikipediaPageSummary)
+    .then((res) => {
+      if (res.status !== 200) {
+        throw new Error(`fetch wikipedia summary result with ${res.status} error`);
+      }
+      return res.data as WikipediaPageSummary;
+    })
     .catch((err) => {
       console.error(err);
       throw new Error('failed to fetch wikipedia summary result');

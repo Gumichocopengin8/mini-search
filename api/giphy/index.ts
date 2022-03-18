@@ -19,7 +19,12 @@ export const fetchGifSearchResultUsingGET = async (
         lang: lang,
       },
     })
-    .then((res) => res.data as GiphySearchResult)
+    .then((res) => {
+      if (res.status !== 200) {
+        throw new Error(`fetch Giphy search result with ${res.status} error`);
+      }
+      return res.data as GiphySearchResult;
+    })
     .catch((err) => {
       console.error(err);
       throw new Error('failed to fetch Giphy search result');
@@ -40,7 +45,12 @@ export const fetchAutoCompletetUsingGET = async (
         offset: (pageNumber - 1) * limit,
       },
     })
-    .then((res) => res.data as GiphyAutoComplete)
+    .then((res) => {
+      if (res.status !== 200) {
+        throw new Error(`fetch Giphy autocomplete with ${res.status} error`);
+      }
+      return res.data as GiphyAutoComplete;
+    })
     .catch((err) => {
       console.error(err);
       throw new Error('failed to fetch Giphy autocomplete');

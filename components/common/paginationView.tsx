@@ -9,13 +9,17 @@ interface Props {
 }
 
 const PaginationView = ({ page, totalHits, itemLimit, onPageChange }: Props) => {
+  //  Up to 10000 search results are supported
+  // example: https://en.wikipedia.org/w/api.php?action=query&srsearch=s&srlimit=20&sroffset=10000&list=search&format=json&utf8=&origin=*
+  const WIKIPEDIA_API_LIMIT = 10000;
+
   return (
     <Stack spacing={2} css={PagenationItem}>
       <Pagination
         shape="rounded"
         page={page}
         size="large"
-        count={Math.ceil(totalHits / itemLimit)}
+        count={totalHits < WIKIPEDIA_API_LIMIT ? Math.ceil(totalHits / itemLimit) : WIKIPEDIA_API_LIMIT / itemLimit}
         onChange={onPageChange}
       />
     </Stack>
