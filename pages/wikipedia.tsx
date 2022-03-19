@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext, useRef } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { Typography, FormGroup, FormControl, Box, SelectChangeEvent, CircularProgress } from '@mui/material';
@@ -13,27 +13,37 @@ import { languageData, WikiFormTypes } from 'data/wikipedia/data';
 import SelectBoxField from '@/components/common/searchFields/selectBoxField';
 import ErrorStackbar from '@/components/common/errorSnackbar';
 import WikiCard from '@/components/contents/wikipedia/wikiCard';
+import { AppContext } from 'state/context';
 
 const WikiPediaHome = () => {
   const ITEM_LIMIT = 20;
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [lang, setLang] = useState<string>('en');
-  const [page, setPage] = useState<number>(1);
-  const [totalHits, setTotalHits] = useState<number>(0);
-  const [wikiSummaries, setWikiSummaries] = useState<WikipediaPageSummary[]>([]);
+  const { wikiStore, wikiSummaryDispatch } = useContext(AppContext);
+  const [searchQuery, setSearchQuery] = useState<string>(wikiStore.queryParams.query);
+  const [lang, setLang] = useState<string>(wikiStore.queryParams.lang);
+  const [page, setPage] = useState<number>(wikiStore.queryParams.page);
+  const [totalHits, setTotalHits] = useState<number>(wikiStore.queryParams.totalHits);
+  const [wikiSummaries, setWikiSummaries] = useState<WikipediaPageSummary[]>(wikiStore.wikipediaPageSummaries);
   const [isLoading, setIsLoding] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
   const { register, handleSubmit, reset, setValue } = useForm<WikiFormTypes>();
+  const isMounted = useRef(false);
 
   useEffect(() => {
-    if (!router.isReady) return;
+    if (!router.isReady || wikiStore.wikipediaPageSummaries.length > 0) return;
     const query = String(router.query?.query ?? '');
     setSearchQuery(query);
     setLang(String(router.query?.lang ?? 'en'));
     setPage(Number(router.query?.page ?? 1));
     setValue('inputValue', query);
   }, [router]);
+
+  useEffect(() => {
+    if (wikiStore.wikipediaPageSummaries.length > 0) {
+      router.replace({ pathname: '/wikipedia', query: { ...wikiStore.queryParams } });
+      setValue('inputValue', wikiStore.queryParams.query);
+    }
+  }, []);
 
   useEffect(() => {
     let unmounted = false;
@@ -51,6 +61,16 @@ const WikiPediaHome = () => {
           setWikiSummaries(titleSummaries);
           setTotalHits(searchResult.query.searchinfo.totalhits);
           setIsLoding(false);
+          wikiSummaryDispatch({
+            type: 'update',
+            newState: titleSummaries,
+            queryParams: {
+              query: searchQuery,
+              lang: lang,
+              page: page,
+              totalHits: searchResult.query.searchinfo.totalhits,
+            },
+          });
         }
       } catch (err) {
         console.error(err);
@@ -58,7 +78,11 @@ const WikiPediaHome = () => {
         setIsError(true);
       }
     };
-    func();
+    if (isMounted.current) {
+      func();
+    } else {
+      isMounted.current = true;
+    }
     const cleanup = () => {
       unmounted = true;
     };
@@ -106,9 +130,8 @@ const WikiPediaHome = () => {
     setWikiSummaries([]);
     setIsError(false);
     reset();
-    router.push({
-      pathname: '/wikipedia',
-    });
+    wikiSummaryDispatch({ type: 'clear', queryParams: { query: '', lang: 'en', page: 1, totalHits: 0 } });
+    router.push({ pathname: '/wikipedia' });
   };
 
   return (

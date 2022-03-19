@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { css } from '@emotion/react';
 import { Box, Tabs, Tab, Typography } from '@mui/material';
@@ -7,6 +7,20 @@ import { APIType } from 'state/contextReducer';
 const NavBar = () => {
   const router = useRouter();
   const [tabValue, setTabValue] = useState<number>(0);
+
+  useEffect(() => {
+    switch (router.pathname) {
+      case `/${APIType.wikipedia}`:
+        setTabValue(0);
+        break;
+      case `/${APIType.giphy}`:
+        setTabValue(1);
+        break;
+      default:
+        setTabValue(100); // 404 page
+        break;
+    }
+  }, [router.isReady]);
 
   const onTabChange = (e: React.SyntheticEvent, newValue: number) => setTabValue(newValue);
 

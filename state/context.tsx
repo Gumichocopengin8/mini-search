@@ -1,33 +1,25 @@
-import { useRouter } from 'next/router';
-import { createContext, ReactNode, useReducer, useMemo, useEffect, Dispatch } from 'react';
-import { TabViewProps, initialState, reducer, APIType } from './contextReducer';
+import { createContext, ReactNode, useReducer, useMemo, Dispatch } from 'react';
+import { WikiStore, wikiSummaryReducer, wikiSummaryInitialState, WikiSummaryType } from './contextReducer';
 
 type Props = {
   children: ReactNode;
 };
 
 const AppContext = createContext<{
-  apiType: TabViewProps;
-  dispatch: Dispatch<{ type: string }>;
+  wikiStore: WikiStore;
+  wikiSummaryDispatch: Dispatch<WikiSummaryType>;
 }>({
-  apiType: initialState,
-  dispatch: () => null,
+  wikiStore: wikiSummaryInitialState,
+  wikiSummaryDispatch: () => null,
 });
 
 const AppProvider = ({ children }: Props) => {
-  const router = useRouter();
-  const [state, dispatch] = useReducer(reducer, initialState);
-
-  useEffect(() => {
-    if (!router.isReady) return;
-    const queryRef = String(router.query?.ref ?? APIType.wikipedia);
-    dispatch({ type: queryRef === APIType.wikipedia ? APIType.wikipedia : APIType.giphy });
-  }, [router.isReady]);
+  const [state, dispatch] = useReducer(wikiSummaryReducer, wikiSummaryInitialState);
 
   const value = useMemo(
     () => ({
-      apiType: state,
-      dispatch,
+      wikiStore: state,
+      wikiSummaryDispatch: dispatch,
     }),
     [state]
   );

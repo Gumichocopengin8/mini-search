@@ -1,24 +1,45 @@
+import { WikipediaPageSummary } from 'interfaces/wikipedia/search';
+
 export enum APIType {
   wikipedia = 'wikipedia',
   giphy = 'giphy',
 }
 
-export type TabViewProps = {
-  currentTab: APIType;
+interface QueryParamType {
+  query: string;
+  lang: string;
+  page: number;
+  totalHits: number;
+}
+
+export type WikiStore = {
+  wikipediaPageSummaries: WikipediaPageSummary[];
+  queryParams: QueryParamType;
 };
 
-export const reducer = (state: TabViewProps, action: { type: string }): TabViewProps => {
-  switch (action.type) {
-    case APIType.wikipedia:
-      return { ...state, currentTab: APIType.wikipedia };
-    case APIType.giphy:
-      return { ...state, currentTab: APIType.giphy };
+export type WikiSummaryType =
+  | {
+      type: 'update';
+      newState: WikipediaPageSummary[];
+      queryParams: QueryParamType;
+    }
+  | {
+      type: 'clear';
+      queryParams: QueryParamType;
+    };
 
+export const wikiSummaryReducer = (state: WikiStore, action: WikiSummaryType): WikiStore => {
+  switch (action.type) {
+    case 'update':
+      return { wikipediaPageSummaries: action.newState, queryParams: action.queryParams };
+    case 'clear':
+      return { wikipediaPageSummaries: [], queryParams: action.queryParams };
     default:
       return state;
   }
 };
 
-export const initialState: TabViewProps = {
-  currentTab: APIType.wikipedia,
+export const wikiSummaryInitialState: WikiStore = {
+  wikipediaPageSummaries: [],
+  queryParams: { query: '', lang: 'en', page: 1, totalHits: 0 },
 };
