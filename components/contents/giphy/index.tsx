@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { useRouter } from 'next/router';
 import { Typography, Box, FormControl, FormGroup, SelectChangeEvent, CircularProgress } from '@mui/material';
 import { css } from '@emotion/react';
@@ -12,10 +12,12 @@ import SelectBoxField from '@/components/common/searchFields/selectBoxField';
 import { GiphyFormTypes, ratingData } from 'data/giphy/data';
 import ErrorStackbar from '@/components/common/ErrorSnackbar';
 import { APIType } from 'state/contextReducer';
+import { AppContext } from 'state/context';
 
 const GiphyHome = () => {
   const ITEM_LIMIT = 40;
   const router = useRouter();
+  const { apiType } = useContext(AppContext);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [rating, setRating] = useState<string>('g');
   const [giphyData, setGiphyData] = useState<GiphyData[]>([]);
@@ -23,14 +25,25 @@ const GiphyHome = () => {
   const [totalHits, setTotalHits] = useState<number>(0);
   const [isLoading, setIsLoding] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
-  const { register, handleSubmit, reset } = useForm<GiphyFormTypes>();
+  const { register, handleSubmit, reset, setValue } = useForm<GiphyFormTypes>();
 
   useEffect(() => {
     if (!router.isReady) return;
-    setSearchQuery(String(router.query?.query ?? ''));
+    const query = String(router.query?.query ?? '');
+    setSearchQuery(query);
     setRating(String(router.query?.rating ?? 'g'));
     setPage(Number(router.query?.page ?? 1));
+    setValue('inputValue', query);
   }, [router]);
+
+  useEffect(() => {
+    if (apiType.currentTab === APIType.giphy) {
+      router.replace({
+        pathname: '/',
+        query: { ref: APIType.giphy, page: page, rating: rating, query: searchQuery },
+      });
+    }
+  }, [apiType]);
 
   useEffect(() => {
     let unmounted = false;

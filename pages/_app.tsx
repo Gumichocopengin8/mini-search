@@ -1,14 +1,14 @@
 import { css } from '@emotion/react';
 import type { AppProps } from 'next/app';
-// import { AppProvider } from 'state/context';
+import { AppProvider } from 'state/context';
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
-    // <AppProvider>
-    <div css={Wrapper}>
-      <Component {...pageProps} />
-    </div>
-    // </AppProvider>
+    <AppProvider>
+      <div css={Wrapper}>
+        <Component {...pageProps} />
+      </div>
+    </AppProvider>
   );
 }
 

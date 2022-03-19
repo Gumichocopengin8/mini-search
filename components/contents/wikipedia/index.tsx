@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext } from 'react';
 import { useRouter } from 'next/router';
 import { Typography, FormGroup, FormControl, Box, SelectChangeEvent, CircularProgress } from '@mui/material';
 import { useForm } from 'react-hook-form';
@@ -13,10 +13,12 @@ import SelectBoxField from '@/components/common/searchFields/selectBoxField';
 import ErrorStackbar from '@/components/common/ErrorSnackbar';
 import WikiCard from './wikiCard';
 import { APIType } from 'state/contextReducer';
+import { AppContext } from 'state/context';
 
 const WiKiHome = () => {
   const ITEM_LIMIT = 20;
   const router = useRouter();
+  const { apiType } = useContext(AppContext);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [lang, setLang] = useState<string>('en');
   const [page, setPage] = useState<number>(1);
@@ -24,14 +26,25 @@ const WiKiHome = () => {
   const [wikiSummaries, setWikiSummaries] = useState<WikipediaPageSummary[]>([]);
   const [isLoading, setIsLoding] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
-  const { register, handleSubmit, reset } = useForm<WikiFormTypes>();
+  const { register, handleSubmit, reset, setValue } = useForm<WikiFormTypes>();
 
   useEffect(() => {
     if (!router.isReady) return;
-    setSearchQuery(String(router.query?.query ?? ''));
+    const query = String(router.query?.query ?? '');
+    setSearchQuery(query);
     setLang(String(router.query?.lang ?? 'en'));
     setPage(Number(router.query?.page ?? 1));
-  }, [router.isReady]);
+    setValue('inputValue', query);
+  }, [router]);
+
+  useEffect(() => {
+    if (apiType.currentTab === APIType.wikipedia) {
+      router.replace({
+        pathname: '/',
+        query: { ref: APIType.wikipedia, query: searchQuery, lang: lang, page: page },
+      });
+    }
+  }, [apiType]);
 
   useEffect(() => {
     let unmounted = false;

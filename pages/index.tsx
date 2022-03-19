@@ -1,22 +1,15 @@
-import { useEffect, useState } from 'react';
-import { useRouter } from 'next/router';
+import { useContext } from 'react';
 import type { NextPage } from 'next';
 import Head from 'next/head';
 import { Divider } from '@mui/material';
 import { css } from '@emotion/react';
 import NavBar from '@/components/common/navbar';
-import { APIType } from 'state/contextReducer';
 import GiphyHome from '@/components/contents/giphy';
 import WiKiHome from '@/components/contents/wikipedia';
+import { AppContext } from 'state/context';
 
 const Home: NextPage = () => {
-  const router = useRouter();
-  const [currentTab, setCurrentTab] = useState<string>(APIType.wikipedia);
-
-  useEffect(() => {
-    if (!router.isReady) return;
-    setCurrentTab(String(router.query?.ref ?? APIType.wikipedia));
-  }, [router]);
+  const { apiType } = useContext(AppContext);
 
   return (
     <div>
@@ -31,10 +24,10 @@ const Home: NextPage = () => {
           <Divider orientation="vertical" />
         </nav>
         <main css={[MainContainer, Main]}>
-          <div style={{ display: currentTab === 'giphy' ? 'block' : 'none' }}>
+          <div style={{ display: apiType.currentTab === 'giphy' ? 'block' : 'none' }}>
             <GiphyHome />
           </div>
-          <div style={{ display: currentTab === 'wikipedia' ? 'block' : 'none' }}>
+          <div style={{ display: apiType.currentTab === 'wikipedia' ? 'block' : 'none' }}>
             <WiKiHome />
           </div>
         </main>
