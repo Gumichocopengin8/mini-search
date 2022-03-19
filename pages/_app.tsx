@@ -55,7 +55,7 @@ const TabNavContainer = css({
 
 const MainContainer = css({
   gridArea: 'content',
-  minWidth: '840px',
+  minWidth: '860px',
   height: '100vh',
   overflowY: 'hidden',
   boxSizing: 'border-box',
