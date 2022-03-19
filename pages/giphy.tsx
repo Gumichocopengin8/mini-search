@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useContext, useRef } from 'react';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { Typography, Box, FormControl, FormGroup, SelectChangeEvent, CircularProgress } from '@mui/material';
@@ -12,27 +12,37 @@ import PaginationView from '@/components/common/paginationView';
 import SelectBoxField from '@/components/common/searchFields/selectBoxField';
 import { GiphyFormTypes, ratingData } from 'data/giphy/data';
 import ErrorStackbar from '@/components/common/errorSnackbar';
+import { AppContext } from 'state/context';
 
 const GiphyHome = () => {
   const ITEM_LIMIT = 40;
   const router = useRouter();
-  const [searchQuery, setSearchQuery] = useState<string>('');
-  const [rating, setRating] = useState<string>('g');
-  const [giphyData, setGiphyData] = useState<GiphyData[]>([]);
-  const [page, setPage] = useState<number>(1);
-  const [totalHits, setTotalHits] = useState<number>(0);
+  const { ghipyStore, giphyDataDispatch } = useContext(AppContext);
+  const [searchQuery, setSearchQuery] = useState<string>(ghipyStore.queryParams.query);
+  const [rating, setRating] = useState<string>(ghipyStore.queryParams.rating);
+  const [giphyData, setGiphyData] = useState<GiphyData[]>(ghipyStore.giphyData);
+  const [page, setPage] = useState<number>(ghipyStore.queryParams.page);
+  const [totalHits, setTotalHits] = useState<number>(ghipyStore.queryParams.totalHits);
   const [isLoading, setIsLoding] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
   const { register, handleSubmit, reset, setValue } = useForm<GiphyFormTypes>();
+  const isMounted = useRef(false);
 
   useEffect(() => {
-    if (!router.isReady) return;
+    if (!router.isReady || ghipyStore.giphyData.length > 0) return;
     const query = String(router.query?.query ?? '');
     setSearchQuery(query);
     setRating(String(router.query?.rating ?? 'g'));
     setPage(Number(router.query?.page ?? 1));
     setValue('inputValue', query);
   }, [router]);
+
+  useEffect(() => {
+    if (ghipyStore.giphyData.length > 0) {
+      router.replace({ pathname: '/giphy', query: { ...ghipyStore.queryParams } });
+      setValue('inputValue', ghipyStore.queryParams.query);
+    }
+  }, []);
 
   useEffect(() => {
     let unmounted = false;
@@ -46,6 +56,16 @@ const GiphyHome = () => {
           setGiphyData(data.data);
           setTotalHits(data.pagination.total_count);
           setIsLoding(false);
+          giphyDataDispatch({
+            type: 'update',
+            newState: data.data,
+            queryParams: {
+              query: searchQuery,
+              rating: rating,
+              page: page,
+              totalHits: data.pagination.total_count,
+            },
+          });
         }
       } catch (err) {
         console.error(err);
@@ -53,7 +73,11 @@ const GiphyHome = () => {
         setIsError(true);
       }
     };
-    func();
+    if (isMounted.current) {
+      func();
+    } else {
+      isMounted.current = true;
+    }
     const cleanup = () => {
       unmounted = true;
     };
@@ -101,9 +125,8 @@ const GiphyHome = () => {
     setGiphyData([]);
     setIsError(false);
     reset();
-    router.push({
-      pathname: '/giphy',
-    });
+    giphyDataDispatch({ type: 'clear', queryParams: { query: '', rating: 'g', page: 1, totalHits: 0 } });
+    router.push({ pathname: '/giphy' });
   };
 
   return (

@@ -2,7 +2,11 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import { css } from '@emotion/react';
 import { Box, Tabs, Tab, Typography } from '@mui/material';
-import { APIType } from 'state/contextReducer';
+
+export enum APIType {
+  wikipedia = 'wikipedia',
+  giphy = 'giphy',
+}
 
 const NavBar = () => {
   const router = useRouter();

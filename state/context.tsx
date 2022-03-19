@@ -1,5 +1,6 @@
 import { createContext, ReactNode, useReducer, useMemo, Dispatch } from 'react';
-import { WikiStore, wikiSummaryReducer, wikiSummaryInitialState, WikiSummaryType } from './contextReducer';
+import { GhipyStore, giphyDataInitialState, giphyDataReducer, GiphyDataType } from './giphyContextReducer';
+import { WikiStore, wikiSummaryReducer, wikiSummaryInitialState, WikiSummaryType } from './wikiContextReducer';
 
 type Props = {
   children: ReactNode;
@@ -8,20 +9,27 @@ type Props = {
 const AppContext = createContext<{
   wikiStore: WikiStore;
   wikiSummaryDispatch: Dispatch<WikiSummaryType>;
+  ghipyStore: GhipyStore;
+  giphyDataDispatch: Dispatch<GiphyDataType>;
 }>({
   wikiStore: wikiSummaryInitialState,
   wikiSummaryDispatch: () => null,
+  ghipyStore: giphyDataInitialState,
+  giphyDataDispatch: () => null,
 });
 
 const AppProvider = ({ children }: Props) => {
-  const [state, dispatch] = useReducer(wikiSummaryReducer, wikiSummaryInitialState);
+  const [wikiState, wikiDispatch] = useReducer(wikiSummaryReducer, wikiSummaryInitialState);
+  const [giphyState, giphyDispatch] = useReducer(giphyDataReducer, giphyDataInitialState);
 
   const value = useMemo(
     () => ({
-      wikiStore: state,
-      wikiSummaryDispatch: dispatch,
+      wikiStore: wikiState,
+      wikiSummaryDispatch: wikiDispatch,
+      ghipyStore: giphyState,
+      giphyDataDispatch: giphyDispatch,
     }),
-    [state]
+    [wikiState, giphyState]
   );
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };

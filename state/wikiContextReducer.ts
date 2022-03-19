@@ -1,10 +1,5 @@
 import { WikipediaPageSummary } from 'interfaces/wikipedia/search';
 
-export enum APIType {
-  wikipedia = 'wikipedia',
-  giphy = 'giphy',
-}
-
 interface QueryParamType {
   query: string;
   lang: string;
