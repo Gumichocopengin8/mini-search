@@ -86,25 +86,17 @@ const GiphyHome = () => {
 
   const onPageChange = (e: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
-    router.push({
-      pathname: '/giphy',
-      query: { page: value, rating: rating, query: searchQuery },
-    });
+    router.push({ pathname: '/giphy', query: { page: value, rating: rating, query: searchQuery } });
   };
 
   const onChangeRating = (event: SelectChangeEvent) => {
     const newRating = event.target.value as string;
     setRating(newRating);
-    router.push({
-      pathname: '/giphy',
-      query: { page: page, rating: newRating, query: searchQuery },
-    });
+    router.push({ pathname: '/giphy', query: { page: page, rating: newRating, query: searchQuery } });
   };
 
   const onCloseError = (event?: React.SyntheticEvent | Event, reason?: string) => {
-    if (reason === 'clickaway') {
-      return;
-    }
+    if (reason === 'clickaway') return;
     setIsError(false);
   };
 
@@ -133,7 +125,7 @@ const GiphyHome = () => {
     <>
       <Head>
         <title>Giphy | API Search</title>
-        <meta name="description" content="API Search" />
+        <meta name="description" content="Giphy API Search" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
@@ -165,7 +157,13 @@ const GiphyHome = () => {
                       {giphyData
                         .filter((_, i) => i % 4 === index)
                         .map((data) => (
-                          <a key={data.id} href={data.images.original.webp} target="_blank" rel="noopener noreferrer">
+                          <a
+                            css={global.ClickAnimation}
+                            key={data.id}
+                            href={data.images.original.webp}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
                             <img src={data.images.original.webp} loading="lazy" css={ImageContent} />
                           </a>
                         ))}

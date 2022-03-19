@@ -9,7 +9,7 @@ interface Props {
 
 const WikiCard = ({ summary }: Props) => {
   return (
-    <Card sx={{ maxWidth: 600, width: '30%', minWidth: 270 }} title={summary.title}>
+    <Card sx={{ maxWidth: 600, width: '30%', minWidth: 270 }} title={summary.title} css={global.ClickAnimation}>
       <a css={Anchor} href={summary.content_urls.desktop.page} target="_blank" rel="noopener noreferrer">
         <CardMedia
           component="img"

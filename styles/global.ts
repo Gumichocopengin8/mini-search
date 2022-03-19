@@ -50,3 +50,11 @@ export const MultiLineEllipsis = css({
   WebkitLineClamp: 5,
   overflow: 'hidden',
 });
+
+export const ClickAnimation = css`
+  transition: 0.3s;
+
+  &:active {
+    transform: scale(0.9);
+  }
+`;

@@ -98,28 +98,20 @@ const WikiPediaHome = () => {
   };
 
   const onCloseError = (e?: React.SyntheticEvent | Event, reason?: string) => {
-    if (reason === 'clickaway') {
-      return;
-    }
+    if (reason === 'clickaway') return;
     setIsError(false);
   };
 
   const onChangeLang = (e: SelectChangeEvent) => {
     const newLang = e.target.value as string;
     setLang(newLang);
-    router.push({
-      pathname: '/wikipedia',
-      query: { query: searchQuery, lang: newLang, page: page },
-    });
+    router.push({ pathname: '/wikipedia', query: { query: searchQuery, lang: newLang, page: page } });
   };
 
   const onSubmit = ({ inputValue }: WikiFormTypes) => {
     setPage(1);
     setSearchQuery(inputValue);
-    router.push({
-      pathname: '/wikipedia',
-      query: { query: inputValue, lang: lang, page: 1 },
-    });
+    router.push({ pathname: '/wikipedia', query: { query: inputValue, lang: lang, page: 1 } });
   };
 
   const onClickTitle = () => {
@@ -138,7 +130,7 @@ const WikiPediaHome = () => {
     <>
       <Head>
         <title>Wikipedia | API Search</title>
-        <meta name="description" content="API Search" />
+        <meta name="description" content="Wikipedia API Search" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div css={global.Container}>
