@@ -69,7 +69,7 @@ const GiphyHome = () => {
         }
       } catch (err) {
         console.error(err);
-        setIsError(false);
+        setIsLoding(false);
         setIsError(true);
       }
     };

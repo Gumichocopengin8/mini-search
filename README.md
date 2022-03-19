@@ -24,6 +24,12 @@ Build a hosted React web application with a rich UI/UX that allows the user to s
 
 - All code must be pushed to the repo
 
+## How to Run
+
+- Run `npm i`
+- Run `npm run dev`
+- Access `localhost:3000`
+
 ## Website Link
 
 - http://frontend-api-search.vercel.app/
