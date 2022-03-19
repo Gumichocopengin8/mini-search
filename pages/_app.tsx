@@ -11,8 +11,8 @@ function MyApp({ Component, pageProps }: AppProps) {
       <div css={Wrapper}>
         <>
           <Head>
-            <title>API Search</title>
-            <meta name="description" content="API Search" />
+            <title>Mini Search</title>
+            <meta name="description" content="Mini Search" />
             <link rel="icon" href="/favicon.ico" />
           </Head>
           <div css={GridContainer}>

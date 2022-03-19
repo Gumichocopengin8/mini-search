@@ -20,8 +20,8 @@ const NavBar = () => {
       case `/${APIType.giphy}`:
         setTabValue(1);
         break;
-      default:
-        setTabValue(100); // 404 page
+      default: // 404 page
+        setTabValue(100);
         break;
     }
   }, [router.isReady]);
@@ -38,7 +38,7 @@ const NavBar = () => {
   return (
     <div css={NavContainer}>
       <Typography variant="h6" gutterBottom component="div">
-        API Search
+        Mini Search
       </Typography>
       <Box sx={{ display: 'flex', flexGrow: 1, bgcolor: 'background.paper' }}>
         <Tabs value={tabValue} onChange={onTabChange} orientation="vertical">

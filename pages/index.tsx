@@ -5,8 +5,8 @@ const Home: NextPage = () => {
   return (
     <>
       <Head>
-        <title>Home | API Search</title>
-        <meta name="description" content="API Search" />
+        <title>Home | Mini Search</title>
+        <meta name="description" content="Mini Search" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div>redirect to wiki</div>

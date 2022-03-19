@@ -124,8 +124,8 @@ const GiphyHome = () => {
   return (
     <>
       <Head>
-        <title>Giphy | API Search</title>
-        <meta name="description" content="Giphy API Search" />
+        <title>Giphy | Mini Search</title>
+        <meta name="description" content="Giphy Mini Search" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
 

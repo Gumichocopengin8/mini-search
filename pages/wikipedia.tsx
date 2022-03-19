@@ -129,8 +129,8 @@ const WikiPediaHome = () => {
   return (
     <>
       <Head>
-        <title>Wikipedia | API Search</title>
-        <meta name="description" content="Wikipedia API Search" />
+        <title>Wikipedia | Mini Search</title>
+        <meta name="description" content="Wikipedia Mini Search" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
       <div css={global.Container}>
