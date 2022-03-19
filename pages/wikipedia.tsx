@@ -1,5 +1,6 @@
-import { useEffect, useState, useContext } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
+import Head from 'next/head';
 import { Typography, FormGroup, FormControl, Box, SelectChangeEvent, CircularProgress } from '@mui/material';
 import { useForm } from 'react-hook-form';
 import { css } from '@emotion/react';
@@ -10,15 +11,12 @@ import * as global from 'styles/global';
 import PaginationView from '@/components/common/paginationView';
 import { languageData, WikiFormTypes } from 'data/wikipedia/data';
 import SelectBoxField from '@/components/common/searchFields/selectBoxField';
-import ErrorStackbar from '@/components/common/ErrorSnackbar';
-import WikiCard from './wikiCard';
-import { APIType } from 'state/contextReducer';
-import { AppContext } from 'state/context';
+import ErrorStackbar from '@/components/common/errorSnackbar';
+import WikiCard from '@/components/contents/wikipedia/wikiCard';
 
-const WiKiHome = () => {
+const WikiPediaHome = () => {
   const ITEM_LIMIT = 20;
   const router = useRouter();
-  const { apiType } = useContext(AppContext);
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [lang, setLang] = useState<string>('en');
   const [page, setPage] = useState<number>(1);
@@ -36,15 +34,6 @@ const WiKiHome = () => {
     setPage(Number(router.query?.page ?? 1));
     setValue('inputValue', query);
   }, [router]);
-
-  useEffect(() => {
-    if (apiType.currentTab === APIType.wikipedia) {
-      router.replace({
-        pathname: '/',
-        query: { ref: APIType.wikipedia, query: searchQuery, lang: lang, page: page },
-      });
-    }
-  }, [apiType]);
 
   useEffect(() => {
     let unmounted = false;
@@ -79,8 +68,8 @@ const WiKiHome = () => {
   const onPageChange = (e: React.ChangeEvent<unknown>, value: number) => {
     setPage(value);
     router.push({
-      pathname: '/',
-      query: { ref: APIType.wikipedia, query: searchQuery, lang: lang, page: value },
+      pathname: '/wikipedia',
+      query: { query: searchQuery, lang: lang, page: value },
     });
   };
 
@@ -95,8 +84,8 @@ const WiKiHome = () => {
     const newLang = e.target.value as string;
     setLang(newLang);
     router.push({
-      pathname: '/',
-      query: { ref: APIType.wikipedia, query: searchQuery, lang: newLang, page: page },
+      pathname: '/wikipedia',
+      query: { query: searchQuery, lang: newLang, page: page },
     });
   };
 
@@ -104,8 +93,8 @@ const WiKiHome = () => {
     setPage(1);
     setSearchQuery(inputValue);
     router.push({
-      pathname: '/',
-      query: { ref: APIType.wikipedia, query: inputValue, lang: lang, page: 1 },
+      pathname: '/wikipedia',
+      query: { query: inputValue, lang: lang, page: 1 },
     });
   };
 
@@ -118,75 +107,81 @@ const WiKiHome = () => {
     setIsError(false);
     reset();
     router.push({
-      pathname: '/',
-      query: { ref: APIType.wikipedia },
+      pathname: '/wikipedia',
     });
   };
 
   return (
-    <div css={global.Container}>
-      <Box component="form" onSubmit={handleSubmit(onSubmit)} css={global.SearchFormBox}>
-        <Typography variant="h6" component="h1" onClick={onClickTitle} style={{ cursor: 'pointer' }}>
-          Wikipedia Search
-        </Typography>
-        <FormGroup row={true} css={global.SearchForm}>
-          <FormControl sx={{ minWidth: 200 }} size="small">
-            <SelectBoxField label={'Language'} value={lang} keywords={languageData} onChangeValue={onChangeLang} />
-          </FormControl>
-          <FormControl size="small">
-            <MainInputField register={register('inputValue', { required: true })} placeholder={'Wikipedia'} />
-          </FormControl>
-        </FormGroup>
-      </Box>
-      {isLoading ? (
-        <div css={[global.ResultContainer, global.NoResultContainer]}>
-          <CircularProgress />
-        </div>
-      ) : (
-        <>
-          {wikiSummaries.length > 0 ? (
-            <div css={global.ResultContainer}>
-              <div css={ArticleColumn}>
-                {wikiSummaries.map((summary) => (
-                  <WikiCard key={summary.pageid} summary={summary} />
-                ))}
+    <>
+      <Head>
+        <title>Wikipedia | API Search</title>
+        <meta name="description" content="API Search" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+      <div css={global.Container}>
+        <Box component="form" onSubmit={handleSubmit(onSubmit)} css={global.SearchFormBox}>
+          <Typography variant="h6" component="h1" onClick={onClickTitle} style={{ cursor: 'pointer' }}>
+            Wikipedia Search
+          </Typography>
+          <FormGroup row={true} css={global.SearchForm}>
+            <FormControl sx={{ minWidth: 200 }} size="small">
+              <SelectBoxField label={'Language'} value={lang} keywords={languageData} onChangeValue={onChangeLang} />
+            </FormControl>
+            <FormControl size="small">
+              <MainInputField register={register('inputValue', { required: true })} placeholder={'Wikipedia'} />
+            </FormControl>
+          </FormGroup>
+        </Box>
+        {isLoading ? (
+          <div css={[global.ResultContainer, global.NoResultContainer]}>
+            <CircularProgress />
+          </div>
+        ) : (
+          <>
+            {wikiSummaries.length > 0 ? (
+              <div css={global.ResultContainer}>
+                <div css={ArticleColumn}>
+                  {wikiSummaries.map((summary) => (
+                    <WikiCard key={summary.pageid} summary={summary} />
+                  ))}
+                </div>
+                <PaginationView
+                  page={page}
+                  totalHits={totalHits}
+                  itemLimit={ITEM_LIMIT}
+                  //  Up to 10000 search results are supported
+                  // example: https://en.wikipedia.org/w/api.php?action=query&srsearch=s&srlimit=20&sroffset=10000&list=search&format=json&utf8=&origin=*
+                  API_CALL_LIMIT={10000}
+                  onPageChange={onPageChange}
+                />
+                <Typography variant="caption">Powered by Wikipedia</Typography>
+                <ErrorStackbar isError={isError} onCloseError={onCloseError} />
               </div>
-              <PaginationView
-                page={page}
-                totalHits={totalHits}
-                itemLimit={ITEM_LIMIT}
-                //  Up to 10000 search results are supported
-                // example: https://en.wikipedia.org/w/api.php?action=query&srsearch=s&srlimit=20&sroffset=10000&list=search&format=json&utf8=&origin=*
-                API_CALL_LIMIT={10000}
-                onPageChange={onPageChange}
-              />
-              <Typography variant="caption">Powered by Wikipedia</Typography>
-              <ErrorStackbar isError={isError} onCloseError={onCloseError} />
-            </div>
-          ) : (
-            <div css={[global.ResultContainer, global.NoResultContainer]}>
-              {!searchQuery && wikiSummaries.length === 0 ? (
-                <>
-                  <img
-                    src="https://upload.wikimedia.org/wikipedia/commons/8/80/Wikipedia-logo-v2.svg"
-                    width={240}
-                    height={240}
-                    alt="wiki image"
-                  />
+            ) : (
+              <div css={[global.ResultContainer, global.NoResultContainer]}>
+                {!searchQuery && wikiSummaries.length === 0 ? (
+                  <>
+                    <img
+                      src="https://upload.wikimedia.org/wikipedia/commons/8/80/Wikipedia-logo-v2.svg"
+                      width={240}
+                      height={240}
+                      alt="wiki image"
+                    />
+                    <Typography variant="h6" component="div">
+                      Welcome to Wikipedia Search
+                    </Typography>
+                  </>
+                ) : (
                   <Typography variant="h6" component="div">
-                    Welcome to Wikipedia Search
+                    No results
                   </Typography>
-                </>
-              ) : (
-                <Typography variant="h6" component="div">
-                  No results
-                </Typography>
-              )}
-            </div>
-          )}
-        </>
-      )}
-    </div>
+                )}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    </>
   );
 };
 
@@ -198,4 +193,4 @@ const ArticleColumn = css({
   gap: '2rem',
 });
 
-export default WiKiHome;
+export default WikiPediaHome;
