@@ -1,40 +1,47 @@
 import { GiphyData } from 'interfaces/giphy/search';
 
-interface QueryParamType {
+interface GihpyQueryParamType {
   query: string;
   rating: string;
   page: number;
-  totalHits: number;
 }
 
-export type GhipyStore = {
+export type GihpyStore = {
   giphyData: GiphyData[];
-  queryParams: QueryParamType;
+  totalHits: number;
+  queryParams: GihpyQueryParamType;
 };
 
 export type GiphyDataType =
   | {
       type: 'update';
       newState: GiphyData[];
-      queryParams: QueryParamType;
+      totalHits: number;
+      queryParams: GihpyQueryParamType;
+    }
+  | {
+      type: 'update_params';
+      queryParams: GihpyQueryParamType;
     }
   | {
       type: 'clear';
-      queryParams: QueryParamType;
     };
 
-export const giphyDataReducer = (state: GhipyStore, action: GiphyDataType): GhipyStore => {
+export const giphyDataReducer = (state: GihpyStore, action: GiphyDataType): GihpyStore => {
   switch (action.type) {
     case 'update':
-      return { giphyData: action.newState, queryParams: action.queryParams };
+      return { giphyData: action.newState, queryParams: action.queryParams, totalHits: action.totalHits };
+    case 'update_params':
+      return { ...state, queryParams: action.queryParams };
     case 'clear':
-      return { giphyData: [], queryParams: action.queryParams };
+      return { ...giphyDataInitialState };
     default:
       return state;
   }
 };
 
-export const giphyDataInitialState: GhipyStore = {
+export const giphyDataInitialState: GihpyStore = {
   giphyData: [],
-  queryParams: { query: '', rating: 'g', page: 1, totalHits: 0 },
+  totalHits: 0,
+  queryParams: { query: '', rating: 'g', page: 1 },
 };

@@ -6,7 +6,6 @@ import { useForm } from 'react-hook-form';
 import { css } from '@emotion/react';
 import MainInputField from '@/components/common/searchFields/mainInputField';
 import { fetchWikiSearchResultUsingGET, fetchWikiPageSummaryUsingGET } from 'api/wikipedia';
-import { WikipediaPageSummary } from 'interfaces/wikipedia/search';
 import * as global from 'styles/global';
 import PaginationView from '@/components/common/paginationView';
 import { languageData, WikiFormTypes } from 'data/wikipedia/data';
@@ -19,28 +18,29 @@ const WikiPediaHome = () => {
   const ITEM_LIMIT = 20;
   const router = useRouter();
   const { wikiStore, wikiSummaryDispatch } = useContext(AppContext);
-  const [searchQuery, setSearchQuery] = useState<string>(wikiStore.queryParams.query);
-  const [lang, setLang] = useState<string>(wikiStore.queryParams.lang);
-  const [page, setPage] = useState<number>(wikiStore.queryParams.page);
-  const [totalHits, setTotalHits] = useState<number>(wikiStore.queryParams.totalHits);
-  const [wikiSummaries, setWikiSummaries] = useState<WikipediaPageSummary[]>(wikiStore.wikipediaPageSummaries);
   const [isLoading, setIsLoding] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
   const { register, handleSubmit, reset, setValue } = useForm<WikiFormTypes>();
   const isMounted = useRef(false);
 
   useEffect(() => {
-    if (!router.isReady || wikiStore.wikipediaPageSummaries.length > 0) return;
-    const query = String(router.query?.query ?? '');
-    setSearchQuery(query);
-    setLang(String(router.query?.lang ?? 'en'));
-    setPage(Number(router.query?.page ?? 1));
-    setValue('inputValue', query);
+    if (!router.isReady) return;
+    const paramQuery = String(router.query?.query ?? '');
+    const paramLang = String(router.query?.lang ?? 'en');
+    const paramPage = Number(router.query?.page ?? 1);
+    const { query, lang, page } = wikiStore.queryParams;
+
+    // if queries are the same, not update states when router.pathname is changed
+    if (query === paramQuery && lang === paramLang && page === paramPage) return;
+    wikiSummaryDispatch({
+      type: 'update_params',
+      queryParams: { query: paramQuery, lang: paramLang, page: paramPage },
+    });
+    setValue('inputValue', paramQuery);
   }, [router]);
 
   useEffect(() => {
     if (wikiStore.wikipediaPageSummaries.length > 0) {
-      router.replace({ pathname: '/wikipedia', query: { ...wikiStore.queryParams } });
       setValue('inputValue', wikiStore.queryParams.query);
     }
   }, []);
@@ -48,28 +48,23 @@ const WikiPediaHome = () => {
   useEffect(() => {
     let unmounted = false;
     const func = async () => {
-      if (!searchQuery) return;
+      if (!wikiStore.queryParams.query) return;
       setIsError(false);
       setIsLoding(true);
       try {
-        const searchResult = await fetchWikiSearchResultUsingGET(searchQuery, ITEM_LIMIT, page, lang);
+        const { query, page, lang } = wikiStore.queryParams;
+        const searchResult = await fetchWikiSearchResultUsingGET(query, ITEM_LIMIT, page, lang);
         const titlePromise = searchResult.query.search.map((search) =>
           fetchWikiPageSummaryUsingGET(search.title, lang)
         );
         const titleSummaries = await Promise.all(titlePromise);
         if (!unmounted) {
-          setWikiSummaries(titleSummaries);
-          setTotalHits(searchResult.query.searchinfo.totalhits);
           setIsLoding(false);
           wikiSummaryDispatch({
             type: 'update',
             newState: titleSummaries,
-            queryParams: {
-              query: searchQuery,
-              lang: lang,
-              page: page,
-              totalHits: searchResult.query.searchinfo.totalhits,
-            },
+            totalHits: searchResult.query.searchinfo.totalhits,
+            queryParams: { ...wikiStore.queryParams },
           });
         }
       } catch (err) {
@@ -87,14 +82,15 @@ const WikiPediaHome = () => {
       unmounted = true;
     };
     return cleanup;
-  }, [searchQuery, page, lang]);
+  }, [wikiStore.queryParams.query, wikiStore.queryParams.page, wikiStore.queryParams.lang]);
 
   const onPageChange = (e: React.ChangeEvent<unknown>, value: number) => {
-    setPage(value);
-    router.push({
-      pathname: '/wikipedia',
-      query: { query: searchQuery, lang: lang, page: value },
+    const newQueryParam = { ...wikiStore.queryParams, page: value };
+    wikiSummaryDispatch({
+      type: 'update_params',
+      queryParams: newQueryParam,
     });
+    router.push({ pathname: '/wikipedia', query: newQueryParam });
   };
 
   const onCloseError = (e?: React.SyntheticEvent | Event, reason?: string) => {
@@ -104,25 +100,24 @@ const WikiPediaHome = () => {
 
   const onChangeLang = (e: SelectChangeEvent) => {
     const newLang = e.target.value as string;
-    setLang(newLang);
-    router.push({ pathname: '/wikipedia', query: { query: searchQuery, lang: newLang, page: page } });
+    const newQueryParams = { ...wikiStore.queryParams, page: 1, lang: newLang };
+    wikiSummaryDispatch({ type: 'update_params', queryParams: newQueryParams });
+    router.push({ pathname: '/wikipedia', query: newQueryParams });
   };
 
   const onSubmit = ({ inputValue }: WikiFormTypes) => {
-    setPage(1);
-    setSearchQuery(inputValue);
-    router.push({ pathname: '/wikipedia', query: { query: inputValue, lang: lang, page: 1 } });
+    const newQueryParams = { ...wikiStore.queryParams, query: inputValue, page: 1 };
+    wikiSummaryDispatch({
+      type: 'update_params',
+      queryParams: newQueryParams,
+    });
+    router.push({ pathname: '/wikipedia', query: newQueryParams });
   };
 
   const onClickTitle = () => {
-    setSearchQuery('');
-    setLang('en');
-    setPage(1);
-    setTotalHits(0);
-    setWikiSummaries([]);
     setIsError(false);
     reset();
-    wikiSummaryDispatch({ type: 'clear', queryParams: { query: '', lang: 'en', page: 1, totalHits: 0 } });
+    wikiSummaryDispatch({ type: 'clear' });
     router.push({ pathname: '/wikipedia' });
   };
 
@@ -140,7 +135,12 @@ const WikiPediaHome = () => {
           </Typography>
           <FormGroup row={true} css={global.SearchForm}>
             <FormControl sx={{ minWidth: 200 }} size="small">
-              <SelectBoxField label={'Language'} value={lang} keywords={languageData} onChangeValue={onChangeLang} />
+              <SelectBoxField
+                label={'Language'}
+                value={wikiStore.queryParams.lang}
+                keywords={languageData}
+                onChangeValue={onChangeLang}
+              />
             </FormControl>
             <FormControl size="small">
               <MainInputField register={register('inputValue', { required: true })} placeholder={'Wikipedia'} />
@@ -153,16 +153,16 @@ const WikiPediaHome = () => {
           </div>
         ) : (
           <>
-            {wikiSummaries.length > 0 ? (
+            {wikiStore.wikipediaPageSummaries.length > 0 ? (
               <div css={global.ResultContainer}>
                 <div css={ArticleColumn}>
-                  {wikiSummaries.map((summary) => (
+                  {wikiStore.wikipediaPageSummaries.map((summary) => (
                     <WikiCard key={summary.pageid} summary={summary} />
                   ))}
                 </div>
                 <PaginationView
-                  page={page}
-                  totalHits={totalHits}
+                  page={wikiStore.queryParams.page}
+                  totalHits={wikiStore.totalHits}
                   itemLimit={ITEM_LIMIT}
                   //  Up to 10000 search results are supported
                   // example: https://en.wikipedia.org/w/api.php?action=query&srsearch=s&srlimit=20&sroffset=10000&list=search&format=json&utf8=&origin=*
@@ -174,7 +174,7 @@ const WikiPediaHome = () => {
               </div>
             ) : (
               <div css={[global.ResultContainer, global.NoResultContainer]}>
-                {!searchQuery && wikiSummaries.length === 0 ? (
+                {!wikiStore.queryParams.query && wikiStore.wikipediaPageSummaries.length === 0 ? (
                   <>
                     <img
                       src="https://upload.wikimedia.org/wikipedia/commons/8/80/Wikipedia-logo-v2.svg"

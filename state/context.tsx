@@ -1,5 +1,5 @@
 import { createContext, ReactNode, useReducer, useMemo, Dispatch } from 'react';
-import { GhipyStore, giphyDataInitialState, giphyDataReducer, GiphyDataType } from './giphyContextReducer';
+import { GihpyStore, giphyDataInitialState, giphyDataReducer, GiphyDataType } from './giphyContextReducer';
 import { WikiStore, wikiSummaryReducer, wikiSummaryInitialState, WikiSummaryType } from './wikiContextReducer';
 
 type Props = {
@@ -9,12 +9,12 @@ type Props = {
 const AppContext = createContext<{
   wikiStore: WikiStore;
   wikiSummaryDispatch: Dispatch<WikiSummaryType>;
-  ghipyStore: GhipyStore;
+  gihpyStore: GihpyStore;
   giphyDataDispatch: Dispatch<GiphyDataType>;
 }>({
   wikiStore: wikiSummaryInitialState,
   wikiSummaryDispatch: () => null,
-  ghipyStore: giphyDataInitialState,
+  gihpyStore: giphyDataInitialState,
   giphyDataDispatch: () => null,
 });
 
@@ -26,7 +26,7 @@ const AppProvider = ({ children }: Props) => {
     () => ({
       wikiStore: wikiState,
       wikiSummaryDispatch: wikiDispatch,
-      ghipyStore: giphyState,
+      gihpyStore: giphyState,
       giphyDataDispatch: giphyDispatch,
     }),
     [wikiState, giphyState]

@@ -6,7 +6,6 @@ import { css } from '@emotion/react';
 import { useForm } from 'react-hook-form';
 import MainInputField from '@/components/common/searchFields/mainInputField';
 import { fetchGifSearchResultUsingGET } from 'api/giphy';
-import { GiphyData } from 'interfaces/giphy/search';
 import * as global from 'styles/global';
 import PaginationView from '@/components/common/paginationView';
 import SelectBoxField from '@/components/common/searchFields/selectBoxField';
@@ -17,54 +16,49 @@ import { AppContext } from 'state/context';
 const GiphyHome = () => {
   const ITEM_LIMIT = 40;
   const router = useRouter();
-  const { ghipyStore, giphyDataDispatch } = useContext(AppContext);
-  const [searchQuery, setSearchQuery] = useState<string>(ghipyStore.queryParams.query);
-  const [rating, setRating] = useState<string>(ghipyStore.queryParams.rating);
-  const [giphyData, setGiphyData] = useState<GiphyData[]>(ghipyStore.giphyData);
-  const [page, setPage] = useState<number>(ghipyStore.queryParams.page);
-  const [totalHits, setTotalHits] = useState<number>(ghipyStore.queryParams.totalHits);
+  const { gihpyStore, giphyDataDispatch } = useContext(AppContext);
   const [isLoading, setIsLoding] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
   const { register, handleSubmit, reset, setValue } = useForm<GiphyFormTypes>();
   const isMounted = useRef(false);
 
   useEffect(() => {
-    if (!router.isReady || ghipyStore.giphyData.length > 0) return;
-    const query = String(router.query?.query ?? '');
-    setSearchQuery(query);
-    setRating(String(router.query?.rating ?? 'g'));
-    setPage(Number(router.query?.page ?? 1));
+    if (!router.isReady || gihpyStore.giphyData.length > 0) return;
+    const paramQuery = String(router.query?.query ?? '');
+    const paramRating = String(router.query?.rating ?? 'g');
+    const paramPage = Number(router.query?.page ?? 1);
+    const { query, rating, page } = gihpyStore.queryParams;
+
+    if (query === paramQuery && rating === paramRating && page === paramPage) return;
+    giphyDataDispatch({
+      type: 'update_params',
+      queryParams: { query: paramQuery, rating: paramRating, page: paramPage },
+    });
     setValue('inputValue', query);
   }, [router]);
 
   useEffect(() => {
-    if (ghipyStore.giphyData.length > 0) {
-      router.replace({ pathname: '/giphy', query: { ...ghipyStore.queryParams } });
-      setValue('inputValue', ghipyStore.queryParams.query);
+    if (gihpyStore.giphyData.length > 0) {
+      setValue('inputValue', gihpyStore.queryParams.query);
     }
   }, []);
 
   useEffect(() => {
     let unmounted = false;
     const func = async () => {
-      if (!searchQuery) return;
+      if (!gihpyStore.queryParams.query) return;
       setIsError(false);
       setIsLoding(true);
       try {
-        const data = await fetchGifSearchResultUsingGET(searchQuery, rating, 'en', ITEM_LIMIT, page);
+        const { query, page, rating } = gihpyStore.queryParams;
+        const data = await fetchGifSearchResultUsingGET(query, rating, 'en', ITEM_LIMIT, page);
         if (!unmounted && data.meta.status === 200) {
-          setGiphyData(data.data);
-          setTotalHits(data.pagination.total_count);
           setIsLoding(false);
           giphyDataDispatch({
             type: 'update',
             newState: data.data,
-            queryParams: {
-              query: searchQuery,
-              rating: rating,
-              page: page,
-              totalHits: data.pagination.total_count,
-            },
+            totalHits: data.pagination.total_count,
+            queryParams: { ...gihpyStore.queryParams },
           });
         }
       } catch (err) {
@@ -82,17 +76,25 @@ const GiphyHome = () => {
       unmounted = true;
     };
     return cleanup;
-  }, [searchQuery, page, rating]);
+  }, [gihpyStore.queryParams.query, gihpyStore.queryParams.page, gihpyStore.queryParams.rating]);
 
   const onPageChange = (e: React.ChangeEvent<unknown>, value: number) => {
-    setPage(value);
-    router.push({ pathname: '/giphy', query: { page: value, rating: rating, query: searchQuery } });
+    const newQueryParam = { ...gihpyStore.queryParams, page: value };
+    giphyDataDispatch({
+      type: 'update_params',
+      queryParams: newQueryParam,
+    });
+    router.push({ pathname: '/giphy', query: newQueryParam });
   };
 
   const onChangeRating = (event: SelectChangeEvent) => {
     const newRating = event.target.value as string;
-    setRating(newRating);
-    router.push({ pathname: '/giphy', query: { page: page, rating: newRating, query: searchQuery } });
+    const newQueryParam = { ...gihpyStore.queryParams, rating: newRating };
+    giphyDataDispatch({
+      type: 'update_params',
+      queryParams: newQueryParam,
+    });
+    router.push({ pathname: '/giphy', query: newRating });
   };
 
   const onCloseError = (event?: React.SyntheticEvent | Event, reason?: string) => {
@@ -101,23 +103,18 @@ const GiphyHome = () => {
   };
 
   const onSubmit = ({ inputValue }: GiphyFormTypes) => {
-    setPage(1);
-    setSearchQuery(inputValue);
-    router.push({
-      pathname: '/giphy',
-      query: { query: inputValue, rating: rating, page: 1 },
+    const newQueryParam = { ...gihpyStore.queryParams, page: 1, query: inputValue };
+    giphyDataDispatch({
+      type: 'update_params',
+      queryParams: newQueryParam,
     });
+    router.push({ pathname: '/giphy', query: newQueryParam });
   };
 
   const onClickTitle = () => {
-    setSearchQuery('');
-    setRating('g');
-    setPage(1);
-    setTotalHits(0);
-    setGiphyData([]);
     setIsError(false);
     reset();
-    giphyDataDispatch({ type: 'clear', queryParams: { query: '', rating: 'g', page: 1, totalHits: 0 } });
+    giphyDataDispatch({ type: 'clear' });
     router.push({ pathname: '/giphy' });
   };
 
@@ -136,7 +133,12 @@ const GiphyHome = () => {
           </Typography>
           <FormGroup row={true} css={global.SearchForm}>
             <FormControl sx={{ minWidth: 200 }} size="small">
-              <SelectBoxField label={'Rating'} value={rating} keywords={ratingData} onChangeValue={onChangeRating} />
+              <SelectBoxField
+                label={'Rating'}
+                value={gihpyStore.queryParams.rating}
+                keywords={ratingData}
+                onChangeValue={onChangeRating}
+              />
             </FormControl>
             <FormControl size="small">
               <MainInputField register={register('inputValue', { required: true })} placeholder={'Giphy'} />
@@ -149,12 +151,12 @@ const GiphyHome = () => {
           </div>
         ) : (
           <>
-            {giphyData.length > 0 ? (
+            {gihpyStore.giphyData.length > 0 ? (
               <div css={global.ResultContainer}>
                 <div css={Gallery}>
                   {[0, 1, 2, 3].map((index) => (
                     <div key={index} css={GalleryColumn}>
-                      {giphyData
+                      {gihpyStore.giphyData
                         .filter((_, i) => i % 4 === index)
                         .map((data) => (
                           <a
@@ -171,8 +173,8 @@ const GiphyHome = () => {
                   ))}
                 </div>
                 <PaginationView
-                  page={page}
-                  totalHits={totalHits}
+                  page={gihpyStore.queryParams.page}
+                  totalHits={gihpyStore.totalHits}
                   itemLimit={ITEM_LIMIT}
                   API_CALL_LIMIT={5000}
                   onPageChange={onPageChange}
@@ -182,7 +184,7 @@ const GiphyHome = () => {
               </div>
             ) : (
               <div css={[global.ResultContainer, global.NoResultContainer]}>
-                {!searchQuery && giphyData.length === 0 ? (
+                {!gihpyStore.queryParams.query && gihpyStore.giphyData.length === 0 ? (
                   <>
                     <img
                       src="https://upload.wikimedia.org/wikipedia/commons/7/76/Giphy_Logo_9.2016.svg"
