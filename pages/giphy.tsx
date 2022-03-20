@@ -97,7 +97,7 @@ const GiphyHome = () => {
       type: 'update_params',
       queryParams: newQueryParam,
     });
-    router.push({ pathname: '/giphy', query: newRating });
+    router.push({ pathname: '/giphy', query: { ...newQueryParam } });
   };
 
   const onCloseError = (event?: React.SyntheticEvent | Event, reason?: string) => {
