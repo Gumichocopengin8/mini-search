@@ -31,13 +31,10 @@ const WikiPediaHome = () => {
     const paramPage = Number(router.query?.page ?? 1);
     setValue('inputValue', paramQuery);
 
-    if (!paramQuery) {
-      wikiSummaryDispatch({ type: 'clear' });
-      return;
-    }
-
     wikiSummaryDispatch({
-      type: 'update_params',
+      type: 'update',
+      newState: paramQuery ? wikiStore.wikipediaPageSummaries : [],
+      totalHits: paramQuery ? wikiStore.totalHits : 0,
       queryParams: { query: paramQuery, lang: paramLang, page: paramPage },
     });
   }, [router]);
@@ -89,10 +86,7 @@ const WikiPediaHome = () => {
 
   const onPageChange = (e: React.ChangeEvent<unknown>, value: number) => {
     const newQueryParam = { ...wikiStore.queryParams, page: value };
-    wikiSummaryDispatch({
-      type: 'update_params',
-      queryParams: newQueryParam,
-    });
+    wikiSummaryDispatch({ type: 'update_params', queryParams: newQueryParam });
     router.push({ pathname: '/wikipedia', query: newQueryParam });
   };
 
@@ -110,10 +104,7 @@ const WikiPediaHome = () => {
 
   const onSubmit = ({ inputValue }: WikiFormTypes) => {
     const newQueryParams = { ...wikiStore.queryParams, query: inputValue, page: 1 };
-    wikiSummaryDispatch({
-      type: 'update_params',
-      queryParams: newQueryParams,
-    });
+    wikiSummaryDispatch({ type: 'update_params', queryParams: newQueryParams });
     router.push({ pathname: '/wikipedia', query: newQueryParams });
   };
 

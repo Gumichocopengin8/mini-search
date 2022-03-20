@@ -29,13 +29,10 @@ const GiphyHome = () => {
     const paramPage = Number(router.query?.page ?? 1);
     setValue('inputValue', paramQuery);
 
-    if (!paramQuery) {
-      giphyDataDispatch({ type: 'clear' });
-      return;
-    }
-
     giphyDataDispatch({
-      type: 'update_params',
+      type: 'update',
+      newState: paramQuery ? gihpyStore.giphyData : [],
+      totalHits: paramQuery ? gihpyStore.totalHits : 0,
       queryParams: { query: paramQuery, rating: paramRating, page: paramPage },
     });
   }, [router]);
@@ -93,10 +90,7 @@ const GiphyHome = () => {
   const onChangeRating = (event: SelectChangeEvent) => {
     const newRating = event.target.value as string;
     const newQueryParam = { ...gihpyStore.queryParams, rating: newRating };
-    giphyDataDispatch({
-      type: 'update_params',
-      queryParams: newQueryParam,
-    });
+    giphyDataDispatch({ type: 'update_params', queryParams: newQueryParam });
     router.push({ pathname: '/giphy', query: { ...newQueryParam } });
   };
 
@@ -107,10 +101,7 @@ const GiphyHome = () => {
 
   const onSubmit = ({ inputValue }: GiphyFormTypes) => {
     const newQueryParam = { ...gihpyStore.queryParams, page: 1, query: inputValue };
-    giphyDataDispatch({
-      type: 'update_params',
-      queryParams: newQueryParam,
-    });
+    giphyDataDispatch({ type: 'update_params', queryParams: newQueryParam });
     router.push({ pathname: '/giphy', query: newQueryParam });
   };
 
@@ -128,7 +119,6 @@ const GiphyHome = () => {
         <meta name="description" content="Giphy Mini Search" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
-
       <div css={global.Container}>
         <Box component="form" onSubmit={handleSubmit(onSubmit)} css={global.SearchFormBox}>
           <Typography variant="h6" component="h1" onClick={onClickTitle} style={{ cursor: 'pointer' }}>
