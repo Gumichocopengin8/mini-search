@@ -23,18 +23,21 @@ const GiphyHome = () => {
   const isMounted = useRef(false);
 
   useEffect(() => {
-    if (!router.isReady || gihpyStore.giphyData.length > 0) return;
+    if (!router.isReady) return;
     const paramQuery = String(router.query?.query ?? '');
     const paramRating = String(router.query?.rating ?? 'g');
     const paramPage = Number(router.query?.page ?? 1);
-    const { query, rating, page } = gihpyStore.queryParams;
+    setValue('inputValue', paramQuery);
 
-    if (query === paramQuery && rating === paramRating && page === paramPage) return;
+    if (!paramQuery) {
+      giphyDataDispatch({ type: 'clear' });
+      return;
+    }
+
     giphyDataDispatch({
       type: 'update_params',
       queryParams: { query: paramQuery, rating: paramRating, page: paramPage },
     });
-    setValue('inputValue', query);
   }, [router]);
 
   useEffect(() => {

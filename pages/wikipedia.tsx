@@ -25,18 +25,21 @@ const WikiPediaHome = () => {
 
   useEffect(() => {
     if (!router.isReady) return;
+
     const paramQuery = String(router.query?.query ?? '');
     const paramLang = String(router.query?.lang ?? 'en');
     const paramPage = Number(router.query?.page ?? 1);
-    const { query, lang, page } = wikiStore.queryParams;
+    setValue('inputValue', paramQuery);
 
-    // if queries are the same, not update states when router.pathname is changed
-    if (query === paramQuery && lang === paramLang && page === paramPage) return;
+    if (!paramQuery) {
+      wikiSummaryDispatch({ type: 'clear' });
+      return;
+    }
+
     wikiSummaryDispatch({
       type: 'update_params',
       queryParams: { query: paramQuery, lang: paramLang, page: paramPage },
     });
-    setValue('inputValue', paramQuery);
   }, [router]);
 
   useEffect(() => {
