@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  compiler: {
+    emotion: true,
+  },
   env: {
     GIPHY_TOKEN: process.env.GIPHY_TOKEN,
   },
