@@ -24,7 +24,6 @@
     "react-hook-form": "^7.48.2"
   },
   "devDependencies": {
-    "@emotion/babel-plugin": "^11.11.0",
     "@types/node": "20.9.0",
     "@types/react": "^18.2.37",
     "@typescript-eslint/eslint-plugin": "^6.10.0",

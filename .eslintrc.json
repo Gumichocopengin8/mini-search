@@ -13,7 +13,8 @@
     "@typescript-eslint/explicit-function-return-type": "off",
     "@typescript-eslint/prefer-interface": "off",
     "react/react-in-jsx-scope": "off",
-    "react/self-closing-comp": ["error"]
+    "react/self-closing-comp": ["error"],
+    "react/no-unknown-property": ["error", { "ignore": ["css"] }] // TODO: remove this in the future
   },
   "parserOptions": {
     "ecmaFeatures": {
