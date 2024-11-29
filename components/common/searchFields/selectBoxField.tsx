@@ -17,6 +17,7 @@ const SelectBoxField = ({ label, value, keywords, onChangeValue }: Props) => {
         onChange={onChangeValue}
         style={{ marginBottom: '1rem' }}
         label={label}
+        size="small"
         defaultValue={keywords[0].value}
       >
         {keywords.map((keyword) => (
